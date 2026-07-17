@@ -1,6 +1,6 @@
-# Hướng dẫn triển khai Furigana Aid Reader
+# Hướng dẫn triển khai tsubuyaki
 
-Tài liệu này hướng dẫn chi tiết cách đóng gói, tải mô hình lên Hugging Face Hub (Private) và triển khai dịch vụ backend của ứng dụng Furigana Aid Reader.
+Tài liệu này hướng dẫn chi tiết cách đóng gói, tải mô hình lên Hugging Face Hub (Private) và triển khai ứng dụng tsubuyaki.
 
 ## 1. Yêu cầu hệ thống
 - Docker và Docker Compose (nếu chạy local container)

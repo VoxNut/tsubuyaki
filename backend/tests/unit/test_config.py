@@ -30,3 +30,20 @@ def test_remote_revision_rejects_branch_name(
 
     with pytest.raises(ValidationError, match="commit SHA 40 ký tự"):
         Settings(_env_file=None)
+
+
+def test_cors_origins_accepts_comma_separated_environment(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    monkeypatch.setenv("FURIGANA_MODEL_LOCAL_DIR", "/mock/model")
+    monkeypatch.setenv(
+        "FURIGANA_CORS_ORIGINS",
+        "https://example.com, http://localhost:8080",
+    )
+
+    settings = Settings(_env_file=None)
+
+    assert settings.cors_origins == (
+        "https://example.com",
+        "http://localhost:8080",
+    )

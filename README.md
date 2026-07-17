@@ -1,5 +1,5 @@
 ---
-title: Furigana Aid Reader
+title: tsubuyaki
 emoji: 🎧
 colorFrom: purple
 colorTo: blue
@@ -10,19 +10,21 @@ models:
   - voxnuts947/furigana-aid-model
 datasets:
   - Calvin-Xu/Furigana-Aozora
-short_description: Japanese furigana with BERT, MLP, and MeCab.
+short_description: Japanese media reader with BERT, MLP, and MeCab furigana.
 ---
 
-# Furigana Aid Reader
+# tsubuyaki
 
-Backend Phase 1 for a context-aware Japanese Furigana reader. The service
+Context-aware Japanese media reader. The application
 combines a fine-tuned Japanese BERT classification head, a target-aware MLP,
-surface-specific candidate priors, Most-Frequent fallback, and MeCab.
+surface-specific candidate priors, Most-Frequent fallback, and MeCab. Its
+single Docker image serves both the browser UI and the inference API.
 
-The frontend adaptation of
-[kikiyomi](https://github.com/rtr46/kikiyomi) is intentionally deferred to
-Phase 2. The original player workflow and GPL-3.0 attribution will be
-preserved.
+The player workflow is adapted from
+[kikiyomi](https://github.com/rtr46/kikiyomi). Its attribution and the
+GPL-3.0 license are preserved in [NOTICE.md](NOTICE.md) and [LICENSE](LICENSE).
+The UI uses the official
+[Rosé Pine palette](https://github.com/rose-pine/rose-pine-palette).
 
 ## Current status
 
@@ -35,6 +37,10 @@ preserved.
 - The service refuses to become ready when artifact checksums, label mapping,
   tokenizer markers, or model metadata do not match.
 - No weights or secrets are committed to this repository.
+- The media picker accepts MP4, WebM, MKV, MOV, M4V, OGV, AVI, MPEG/MPG and
+  common audio formats. Actual playback still depends on the codecs supported
+  by the user's browser; WebM (VP9/Opus) and MP4 (H.264/AAC) are the safest
+  exchange formats.
 
 The completed Kaggle weights are available locally, but production
 `HybridTuned` inference additionally requires the Phase 0 CSR-like artifacts.
@@ -79,14 +85,14 @@ $env:PYTHONPATH = "backend\src"
 .\.venv\Scripts\python.exe -m pytest backend\tests
 ```
 
-API endpoints:
+Open `http://127.0.0.1:7860/` for the tsubuyaki UI. API endpoints:
 
 - `GET /api/health`
 - `GET /api/ready`
 - `GET /api/version`
 - `POST /api/furigana/generate-batch`
 
-The Docker image exposes the API on port `7860`. Model weights are downloaded
+The Docker image exposes the UI and API on port `7860`. Model weights are downloaded
 at container startup from the configured immutable Hub revision; they are not
 baked into the image or committed to this repository.
 

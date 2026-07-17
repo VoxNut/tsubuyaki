@@ -4,10 +4,10 @@ from __future__ import annotations
 
 import re
 from pathlib import Path
-from typing import Literal
+from typing import Annotated, Literal
 
 from pydantic import AliasChoices, Field, field_validator, model_validator
-from pydantic_settings import BaseSettings, SettingsConfigDict
+from pydantic_settings import BaseSettings, NoDecode, SettingsConfigDict
 
 
 class Settings(BaseSettings):
@@ -41,7 +41,7 @@ class Settings(BaseSettings):
     max_cues_per_request: int = Field(default=64, ge=1, le=512)
     max_chars_per_cue: int = Field(default=2_000, ge=1, le=20_000)
     max_total_chars: int = Field(default=32_000, ge=1, le=500_000)
-    cors_origins: tuple[str, ...] = (
+    cors_origins: Annotated[tuple[str, ...], NoDecode] = (
         "http://localhost:8080",
         "http://127.0.0.1:8080",
     )

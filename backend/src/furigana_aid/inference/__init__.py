@@ -1,4 +1,4 @@
-"""Production inference primitives for Furigana Aid Reader."""
+"""Production inference primitives for tsubuyaki."""
 
 from .context_window import (
     InvalidTargetSpan,

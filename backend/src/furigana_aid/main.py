@@ -2,10 +2,12 @@ from __future__ import annotations
 
 import logging
 from contextlib import asynccontextmanager
+from pathlib import Path
 from typing import AsyncIterator
 
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.staticfiles import StaticFiles
 
 from furigana_aid.config import Settings
 from furigana_aid.runtime import build_runtime
@@ -39,7 +41,7 @@ async def lifespan(app: FastAPI) -> AsyncIterator[None]:
 
 
 app = FastAPI(
-    title="Furigana Aid Reader API",
+    title="tsubuyaki API",
     description="API phân giải cách đọc Kanji tiếng Nhật bằng BERT + MLP",
     version="1.0.0",
     lifespan=lifespan,
@@ -62,3 +64,9 @@ app.add_middleware(
 )
 
 app.include_router(router)
+
+# Mount the SPA last so /api routes keep precedence. The same path works both
+# from the source tree and from /app in the Docker image.
+frontend_dir = Path(__file__).resolve().parents[3] / "frontend"
+if frontend_dir.is_dir():
+    app.mount("/", StaticFiles(directory=frontend_dir, html=True), name="frontend")

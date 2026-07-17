@@ -1,11 +1,12 @@
 {
-    "name": "kikiyomi",
-    "short_name": "kikiyomi",
-    "start_url": "./index.html",
+    "name": "tsubuyaki",
+    "short_name": "tsubuyaki",
+    "description": "Japanese media reader with context-aware furigana",
+    "start_url": "/",
     "scope": "./",
     "display": "fullscreen",
-    "background_color": "#121212",
-    "theme_color": "#121212",
+    "background_color": "#191724",
+    "theme_color": "#191724",
     "icons": [
         {
             "src": "regular-icon.png",

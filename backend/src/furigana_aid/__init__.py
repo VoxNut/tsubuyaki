@@ -1,3 +1,3 @@
-"""Furigana Aid Reader backend."""
+"""tsubuyaki backend."""
 
 __version__ = "0.1.0"

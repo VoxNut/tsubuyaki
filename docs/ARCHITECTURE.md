@@ -1,10 +1,11 @@
-# Backend architecture
+# tsubuyaki architecture
 
 ## Scope
 
-Phase 1 contains only the inference service. The kikiyomi-derived frontend,
-native JSON round-trip, SRT import/export, and browser persistence are Phase 2
-work.
+The Docker image serves the kikiyomi-derived browser frontend and the FastAPI
+inference service from one origin. The frontend provides media playback,
+browser persistence, native JSON round-trip, and SRT import/export; `/api/*`
+routes provide the furigana inference service.
 
 ## Runtime flow
 

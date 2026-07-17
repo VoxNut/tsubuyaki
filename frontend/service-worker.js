@@ -1,4 +1,4 @@
-const CACHE_NAME = 'kikiyomi-v1';
+const CACHE_NAME = 'tsubuyaki-v2';
 const ASSETS = [
   './',
   './index.html',
@@ -35,23 +35,15 @@ self.addEventListener('fetch', (e) => {
     return;
   }
   
+  // Network-first keeps deployed UI updates from being hidden by a stale PWA
+  // cache while still allowing the shell to open offline.
   e.respondWith(
-    caches.match(e.request).then((cachedResponse) => {
-      if (cachedResponse) {
-        return cachedResponse;
-      }
-      return fetch(e.request).then((networkResponse) => {
-        if (!networkResponse || networkResponse.status !== 200 || networkResponse.type !== 'basic') {
-          return networkResponse;
-        }
+    fetch(e.request).then((networkResponse) => {
+      if (networkResponse && networkResponse.status === 200 && networkResponse.type === 'basic') {
         const responseToCache = networkResponse.clone();
-        caches.open(CACHE_NAME).then((cache) => {
-          cache.put(e.request, responseToCache);
-        });
-        return networkResponse;
-      });
-    }).catch(() => {
-      // Offline fallback
-    })
+        caches.open(CACHE_NAME).then((cache) => cache.put(e.request, responseToCache));
+      }
+      return networkResponse;
+    }).catch(() => caches.match(e.request))
   );
 });

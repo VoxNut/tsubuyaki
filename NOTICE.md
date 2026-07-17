@@ -1,8 +1,8 @@
 # Attribution and notices
 
-Furigana Aid Reader is developed by Võ Minh Nhựt as a student project.
+tsubuyaki is developed by Võ Minh Nhựt as a student project.
 
-The reader experience planned for Phase 2 is based on
+The reader experience is based on
 [kikiyomi](https://github.com/rtr46/kikiyomi) by `rtr46`, audited at commit
 `c7c2dd2c3a61ea6aaff431a625ddae5329e0e189` (`v0.0.4`).
 

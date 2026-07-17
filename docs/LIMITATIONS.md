@@ -1,6 +1,6 @@
 # Technical Limitations & Constraints
 
-Tài liệu này tổng hợp các giới hạn kỹ thuật của hệ thống **Furigana Aid Reader** nhằm hướng dẫn vận hành và định hướng tối ưu trong tương lai.
+Tài liệu này tổng hợp các giới hạn kỹ thuật của hệ thống **tsubuyaki** nhằm hướng dẫn vận hành và định hướng tối ưu trong tương lai.
 
 ## 1. Giới hạn tài nguyên và Hiệu năng (Resource & Performance)
 

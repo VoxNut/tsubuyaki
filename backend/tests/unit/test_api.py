@@ -19,6 +19,13 @@ def test_health_endpoint(client: TestClient) -> None:
     assert response.json() == {"status": "ok"}
 
 
+def test_frontend_is_served_from_root(client: TestClient) -> None:
+    response = client.get("/")
+
+    assert response.status_code == 200
+    assert "<title>tsubuyaki</title>" in response.text
+
+
 def test_ready_endpoint_not_initialized(client: TestClient, monkeypatch: pytest.MonkeyPatch) -> None:
     monkeypatch.setitem(app.state._state, "runtime", None)
     monkeypatch.setitem(app.state._state, "runtime_error", "Mocked runtime error")

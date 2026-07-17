@@ -3,16 +3,35 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <meta name="theme-color" content="#121212">
-    <title>kikiyomi</title>
+    <meta name="theme-color" content="#191724">
+    <title>tsubuyaki</title>
     <link rel="icon" type="image/png" href="regular-icon.png">
     <link rel="apple-touch-icon" href="regular-icon.png">
     <link rel="manifest" href="manifest.json">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <style>
-        :root { 
-            --bg: #121212; --surface: #1e1e1e; --primary: #bb86fc; --text: #b0b0b0; --text-active: #ffffff; --sec: #03dac6; --warn: #ffb74d;
+        :root {
+            /* Rosé Pine: https://github.com/rose-pine/rose-pine-palette */
+            --rp-base: #191724;
+            --rp-surface: #1f1d2e;
+            --rp-overlay: #26233a;
+            --rp-muted: #6e6a86;
+            --rp-subtle: #908caa;
+            --rp-text: #e0def4;
+            --rp-love: #eb6f92;
+            --rp-gold: #f6c177;
+            --rp-rose: #ebbcba;
+            --rp-pine: #31748f;
+            --rp-foam: #9ccfd8;
+            --rp-iris: #c4a7e7;
+            --bg: var(--rp-base);
+            --surface: var(--rp-surface);
+            --primary: var(--rp-iris);
+            --text: var(--rp-subtle);
+            --text-active: var(--rp-text);
+            --sec: var(--rp-foam);
+            --warn: var(--rp-gold);
             --font-ui: system-ui, -apple-system, sans-serif;
             --font-reader: system-ui, -apple-system, sans-serif;
             --font-size-base: 36px;
@@ -29,81 +48,88 @@
         
         /* --- UTILS --- */
         .hidden { display: none !important; }
-        .btn { background: var(--surface); color: var(--text); border: 1px solid #333; padding: 8px 14px; border-radius: 6px; cursor: pointer; font-size: 0.9rem; transition: background 0.2s; font-family: var(--font-ui); }
-        .btn:active { background: #333; transform: scale(0.98); }
-        .btn-primary { background: var(--primary); color: #000; font-weight: bold; border: none; }
-        .icon-btn { background: transparent; border: none; color: #888; font-size: 1.3rem; cursor: pointer; padding: 5px; margin-left: 5px; }
-        .icon-btn:hover { color: #fff; }
-        .del-btn { color: #555; font-size: 1.2rem; padding: 0 15px; cursor: pointer; background: transparent; border:none; height: 100%; display: flex; align-items: center; }
-        .del-btn:hover { color: #ff5555; }
+        .btn { background: var(--rp-overlay); color: var(--rp-text); border: 1px solid var(--rp-muted); padding: 8px 14px; border-radius: 8px; cursor: pointer; font-size: 0.9rem; transition: background 0.2s, border-color 0.2s, transform 0.1s; font-family: var(--font-ui); }
+        .btn:hover { background: var(--rp-surface); border-color: var(--rp-iris); }
+        .btn:active { background: var(--rp-surface); transform: scale(0.98); }
+        .btn-primary { background: var(--primary); color: var(--rp-base); font-weight: bold; border: none; }
+        .btn-primary:hover { background: var(--rp-rose); }
+        .icon-btn { background: transparent; border: none; color: var(--rp-subtle); font-size: 1.3rem; cursor: pointer; padding: 5px; margin-left: 5px; }
+        .icon-btn:hover { color: var(--rp-text); }
+        .del-btn { color: var(--rp-muted); font-size: 1.2rem; padding: 0 15px; cursor: pointer; background: transparent; border:none; height: 100%; display: flex; align-items: center; }
+        .del-btn:hover { color: var(--rp-love); }
         
         /* --- MODALS --- */
         .modal-overlay { position: fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.8); z-index: 200; display:flex; justify-content:center; align-items:center; backdrop-filter: blur(2px); }
-        .modal { background: var(--surface); padding: 25px; border-radius: 12px; width: 90%; max-width: 500px; border: 1px solid #333; box-shadow: 0 10px 25px rgba(0,0,0,0.5); max-height: 85vh; display: flex; flex-direction: column; }
+        .modal { background: var(--rp-surface); padding: 25px; border-radius: 14px; width: 90%; max-width: 500px; border: 1px solid var(--rp-overlay); box-shadow: 0 18px 45px rgba(0,0,0,0.45); max-height: 85vh; display: flex; flex-direction: column; }
         .setting-row { margin-bottom: 20px; display:flex; justify-content: space-between; align-items: center; }
-        .setting-row label { color: #e0e0e0; font-size: 0.9rem; flex: 1; }
+        .setting-row label { color: var(--rp-text); font-size: 0.9rem; flex: 1; }
         .setting-input-group { flex: 1; display:flex; justify-content: flex-end; align-items: center; gap: 10px; }
-        select, input[type=number] { padding: 8px; background: #121212; border: 1px solid #333; color: #fff; border-radius: 4px; max-width: 100%; }
+        select, input[type=number], input[type=text] { padding: 8px; background: var(--rp-base); border: 1px solid var(--rp-overlay); color: var(--rp-text); border-radius: 6px; max-width: 100%; }
         
         #loading-overlay { z-index: 300; flex-direction: column; }
-        .spinner { width: 50px; height: 50px; border: 5px solid #333; border-top: 5px solid var(--primary); border-radius: 50%; animation: spin 1s linear infinite; margin-bottom: 20px; }
+        .spinner { width: 50px; height: 50px; border: 5px solid var(--rp-overlay); border-top: 5px solid var(--primary); border-radius: 50%; animation: spin 1s linear infinite; margin-bottom: 20px; }
         @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
     
         .key-table { width: 100%; border-collapse: collapse; font-size: 0.9rem; }
-        .key-table td { padding: 8px 0; border-bottom: 1px solid #333; }
+        .key-table td { padding: 8px 0; border-bottom: 1px solid var(--rp-overlay); }
         .key-table td:first-child { color: var(--primary); font-weight: bold; }
-        .key-table td:last-child { text-align: right; color: #aaa; }
+        .key-table td:last-child { text-align: right; color: var(--rp-subtle); }
         
         /* Bookmarks Modal */
-        .bm-filter-row { margin-bottom: 15px; border-bottom: 1px solid #333; padding-bottom: 15px; }
+        .bm-filter-row { margin-bottom: 15px; border-bottom: 1px solid var(--rp-overlay); padding-bottom: 15px; }
         #bm-list { overflow-y: auto; margin: 0; flex: 1; min-height: 200px; }
         .bm-item { padding: 12px; border-bottom: 1px solid #252525; cursor: pointer; display: grid; grid-template-columns: 1fr auto; gap: 10px; align-items: start; }
         .bm-item:hover { background: #252525; }
         .bm-content { display: flex; flex-direction: column; gap: 5px; overflow: hidden; }
-        .bm-text { color: #e0e0e0; font-size: 0.95rem; line-height: 1.4; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
-        .bm-meta { font-size: 0.75rem; color: #666; display: flex; justify-content: space-between; gap: 10px; }
+        .bm-text { color: var(--rp-text); font-size: 0.95rem; line-height: 1.4; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
+        .bm-meta { font-size: 0.75rem; color: var(--rp-muted); display: flex; justify-content: space-between; gap: 10px; }
         .bm-book-title { color: var(--primary); font-weight: bold; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 150px; }
-        .bm-del-btn { color: #666; background: transparent; border: none; font-size: 1.2rem; cursor: pointer; padding: 5px 10px; }
-        .bm-del-btn:hover { color: #ff5555; background: #333; border-radius: 4px; }
+        .bm-del-btn { color: var(--rp-muted); background: transparent; border: none; font-size: 1.2rem; cursor: pointer; padding: 5px 10px; }
+        .bm-del-btn:hover { color: var(--rp-love); background: var(--rp-overlay); border-radius: 4px; }
 
         /* --- VIEW: LIBRARY --- */
         #view-library { flex: 1; padding: 20px; overflow-y: auto; display: flex; flex-direction: column; align-items: center; max-width: 800px; margin: 0 auto; width: 100%; }
         
-        .drop-zone { width: 100%; height: 100px; border: 2px dashed #333; border-radius: 12px; display: flex; flex-direction: row; gap: 15px; justify-content: center; align-items: center; background: #1a1a1a; margin-bottom: 20px; transition: border-color 0.2s; cursor: pointer; flex-shrink: 0; width: 100%; }
-        .drop-zone:hover { border-color: #666; background: #1f1f1f; }
-        .drop-zone.dragover { border-color: var(--primary); background: #222; }
+        .drop-zone { width: 100%; min-height: 112px; border: 2px dashed var(--rp-muted); border-radius: 16px; display: flex; flex-direction: row; gap: 15px; justify-content: center; align-items: center; background: var(--rp-surface); margin-bottom: 20px; transition: border-color 0.2s, background 0.2s, transform 0.2s; cursor: pointer; flex-shrink: 0; }
+        .drop-zone:hover { border-color: var(--rp-iris); background: var(--rp-overlay); transform: translateY(-1px); }
+        .drop-zone.dragover { border-color: var(--rp-foam); background: var(--rp-overlay); }
         
         #library-list { width: 100%; display: flex; flex-direction: column; gap: 10px; }
 
-        .lib-item { display: flex; justify-content: space-between; align-items: center; padding: 10px; border-radius: 8px; background: #252525; border: 1px solid #333; cursor: pointer; transition: transform 0.1s, background 0.2s; height: 80px; overflow: hidden; }
-        .lib-item:hover { background: #2a2a2a; }
+        .lib-item { display: flex; justify-content: space-between; align-items: center; padding: 10px; border-radius: 12px; background: var(--rp-surface); border: 1px solid var(--rp-overlay); cursor: pointer; transition: transform 0.1s, background 0.2s, border-color 0.2s; height: 80px; overflow: hidden; }
+        .lib-item:hover { background: var(--rp-overlay); border-color: var(--rp-muted); }
         .lib-item:active { transform: scale(0.99); }
-        .lib-item.active-book { border: 2px solid var(--primary); background: #2d2036; }
-        .lib-cover { width: 60px; height: 60px; background: #111; border-radius: 4px; object-fit: cover; margin-right: 15px; flex-shrink: 0; display: flex; align-items: center; justify-content: center; font-size: 1.5rem; color: #333; }
+        .lib-item.active-book { border: 2px solid var(--primary); background: var(--rp-overlay); }
+        .lib-cover { width: 60px; height: 60px; background: var(--rp-base); border-radius: 8px; object-fit: cover; margin-right: 15px; flex-shrink: 0; display: flex; align-items: center; justify-content: center; font-size: 1.5rem; color: var(--rp-muted); }
         .lib-info { flex: 1; min-width: 0; display: flex; flex-direction: column; justify-content: center; }
-        .lib-title { font-weight: bold; font-size: 1rem; margin-bottom: 5px; color: #e0e0e0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-        .lib-meta { color:#888; font-size:0.75rem; display: flex; align-items: center; gap: 6px; }
-        .progress-bar-mini { height: 4px; background: #111; width: 100%; margin-top: 8px; border-radius: 2px; }
+        .lib-title { font-weight: bold; font-size: 1rem; margin-bottom: 5px; color: var(--rp-text); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+        .lib-meta { color:var(--rp-subtle); font-size:0.75rem; display: flex; align-items: center; gap: 6px; }
+        .progress-bar-mini { height: 4px; background: var(--rp-base); width: 100%; margin-top: 8px; border-radius: 2px; }
         .progress-fill-mini { height: 100%; background: var(--sec); width: 0%; border-radius: 2px; }
-        .badge { background: #111; color: #aaa; padding: 2px 5px; border-radius: 3px; font-size: 0.65rem; border: 1px solid #444; text-transform: uppercase; letter-spacing: 0.5px; }
+        .badge { background: var(--rp-base); color: var(--rp-subtle); padding: 2px 5px; border-radius: 4px; font-size: 0.65rem; border: 1px solid var(--rp-muted); text-transform: uppercase; letter-spacing: 0.5px; }
         .badge.cached { border-color: var(--sec); color: var(--sec); }
-        .badge.linked { border-color: #4a9eff; color: #4a9eff; }
+        .badge.linked { border-color: var(--rp-pine); color: var(--rp-foam); }
         .badge.playing { border-color: var(--primary); color: var(--primary); font-weight: bold; }
-        .version-footer { margin-top: auto; padding-top: 20px; color: #444; font-size: 0.8rem; font-family: monospace; }
+        .version-footer { margin-top: auto; padding-top: 20px; color: var(--rp-muted); font-size: 0.8rem; font-family: monospace; }
 
         /* --- VIEW: PLAYER --- */
         #view-player { flex: 1; display: flex; flex-direction: column; height: 100%; overflow: hidden; position: relative; }
         
-        header { height: 60px; padding: 0 10px; background: var(--surface); display: flex; align-items: center; justify-content: space-between; border-bottom: 1px solid #333; z-index: 50; flex-shrink: 0; position: relative; }
+        header { height: 60px; padding: 0 10px; background: var(--surface); display: flex; align-items: center; justify-content: space-between; border-bottom: 1px solid var(--rp-overlay); z-index: 50; flex-shrink: 0; position: relative; }
         #player-title-container { position: absolute; left: 0; top: 0; width: 100%; height: 100%; display: flex; justify-content: center; align-items: center; pointer-events: none; }
-        #player-title { font-weight: bold; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 40%; font-size: 0.9rem; color:#888; pointer-events: auto; }
+        #player-title { font-weight: bold; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 40%; font-size: 0.9rem; color:var(--rp-subtle); pointer-events: auto; }
         
-        #controls { height: 140px; background: var(--surface); padding: 15px 20px; display: flex; flex-direction: column; justify-content: center; gap: 15px; border-top: 1px solid #333; z-index: 50; flex-shrink: 0; }
+        #controls { height: 140px; background: var(--surface); padding: 15px 20px; display: flex; flex-direction: column; justify-content: center; gap: 15px; border-top: 1px solid var(--rp-overlay); z-index: 50; flex-shrink: 0; }
     
-        #player-content { flex: 1; display: flex; flex-direction: column; overflow: hidden; position: relative; z-index: 10; }
+        #player-content { flex: 1; min-height: 0; display: flex; flex-direction: column; overflow: hidden; position: relative; z-index: 10; background: var(--rp-base); }
+
+        .media-stage { position: relative; flex: 0 0 clamp(180px, 36vh, 440px); min-height: 0; display: flex; align-items: center; justify-content: center; background: #000; border-bottom: 1px solid var(--rp-overlay); overflow: hidden; }
+        .media-stage video { width: 100%; height: 100%; object-fit: contain; background: #000; }
+        .media-error { position: absolute; inset: 0; display: flex; align-items: center; justify-content: center; padding: 24px; text-align: center; color: var(--rp-love); background: rgba(25, 23, 36, 0.92); line-height: 1.5; }
         
         /* Subtitles List */
-        #sub-list { flex: 1; overflow-y: auto; padding: 50vh 0; margin: 0; list-style: none; scroll-behavior: auto; background: #121212; position: relative; }
+        #sub-list { flex: 1 1 auto; min-height: 0; overflow-y: auto; padding: 22vh 0; margin: 0; list-style: none; scroll-behavior: auto; background: var(--rp-base); position: relative; }
+        #player-content.has-video #sub-list { padding: 8vh 0; }
         #sub-list li { 
             /* Grid Layout for stability: Star | Text */
             display: grid; 
@@ -113,7 +139,7 @@
             padding: 15px 0; /* Padding vertical only */
             margin: 0 auto; 
             max-width: 95%;
-            color: #555; 
+            color: var(--rp-muted);
             cursor: pointer; 
             font-size: var(--font-size-base); 
             font-family: var(--font-reader); 
@@ -128,7 +154,7 @@
             transform-origin: center center;
         }
 
-        #sub-list li:hover { color: #888; }
+        #sub-list li:hover { color: var(--rp-subtle); }
         
         /* Active State: Scale only the text container */
         #sub-list li.active .text-container { 
@@ -147,69 +173,71 @@
         }
         .star-btn { 
             font-size: 1.5rem; 
-            color: #333; 
+            color: var(--rp-muted);
             cursor: pointer; 
             padding: 5px; 
             opacity: 0.5;
             transition: color 0.2s, opacity 0.2s;
             user-select: none;
         }
-        #sub-list li:hover .star-btn { color: #666; opacity: 1; }
+        #sub-list li:hover .star-btn { color: var(--rp-subtle); opacity: 1; }
         .star-btn:hover { color: var(--warn) !important; opacity: 1 !important; transform: scale(1.1); }
         .star-btn.filled { opacity: 1; color: var(--warn); }
         
         /* Empty State SRT Upload */
         .srt-empty-container { display: flex; flex-direction: column; justify-content: center; align-items: center; height: 100%; width: 100%; padding: 40px; box-sizing: border-box; }
-        .srt-empty { width: 100%; height: 100%; max-width: 600px; max-height: 300px; border: 3px dashed #333; border-radius: 12px; display: flex; flex-direction: column; justify-content: center; align-items: center; color: #666; cursor: pointer; transition: all 0.2s; background: #151515; }
-        .srt-empty:hover { border-color: var(--primary); color: #e0e0e0; background: #1a1a1a; transform: scale(1.01); }
+        .srt-empty { width: 100%; height: 100%; max-width: 600px; max-height: 300px; border: 3px dashed var(--rp-muted); border-radius: 14px; display: flex; flex-direction: column; justify-content: center; align-items: center; color: var(--rp-subtle); cursor: pointer; transition: all 0.2s; background: var(--rp-surface); }
+        .srt-empty:hover { border-color: var(--primary); color: var(--rp-text); background: var(--rp-overlay); transform: scale(1.01); }
         .srt-empty-icon { font-size: 3rem; margin-bottom: 15px; opacity: 0.5; }
     
         /* Chapters Sidebar */
-        #chapter-list { position: absolute; top: 60px; bottom: 140px; right: 0; width: 320px; background: #181818; border-left: 1px solid #333; overflow-y: auto; display: none; z-index: 60; box-shadow: -5px 0 15px rgba(0,0,0,0.5); }
+        #chapter-list { position: absolute; top: 60px; bottom: 140px; right: 0; width: 320px; background: var(--rp-surface); border-left: 1px solid var(--rp-overlay); overflow-y: auto; display: none; z-index: 60; box-shadow: -5px 0 15px rgba(0,0,0,0.5); }
         #chapter-list.open { display: block; }
-        .chap-item { padding: 6px 12px; border-bottom: 1px solid #252525; font-size: 0.85rem; cursor: pointer; color: #888; transition: background 0.2s; display: flex; align-items: center; }
-        .chap-item:hover { background: #252525; color: #ccc; }
-        .chap-item.active-chap { background: var(--primary); color: #000; border-left: none; font-weight: bold; }
-        .chap-item.active-chap .chap-time { color: #222; }
-        .chap-time { font-size: 0.75rem; color: #555; margin-right: 10px; font-family: monospace; min-width: 45px; text-align: right; }
+        .chap-item { padding: 6px 12px; border-bottom: 1px solid var(--rp-overlay); font-size: 0.85rem; cursor: pointer; color: var(--rp-subtle); transition: background 0.2s; display: flex; align-items: center; }
+        .chap-item:hover { background: var(--rp-overlay); color: var(--rp-text); }
+        .chap-item.active-chap { background: var(--primary); color: var(--rp-base); border-left: none; font-weight: bold; }
+        .chap-item.active-chap .chap-time { color: var(--rp-surface); }
+        .chap-time { font-size: 0.75rem; color: var(--rp-muted); margin-right: 10px; font-family: monospace; min-width: 45px; text-align: right; }
         .chap-title { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
     
         /* Custom Seek Bar */
-        .timeline-container { display: flex; align-items: center; gap: 15px; color: #888; font-family: monospace; font-size: 0.9rem; }
+        .timeline-container { display: flex; align-items: center; gap: 15px; color: var(--rp-subtle); font-family: monospace; font-size: 0.9rem; }
         .seek-wrapper { flex: 1; position: relative; height: 16px; display: flex; align-items: center; }
-        .seek-bg { position: absolute; left: 0; width: 100%; height: 4px; background: #333; border-radius: 2px; z-index: 1; }
+        .seek-bg { position: absolute; left: 0; width: 100%; height: 4px; background: var(--rp-overlay); border-radius: 2px; z-index: 1; }
         .seek-fill { position: absolute; left: 0; width: 0%; height: 4px; background: var(--primary); border-radius: 2px; z-index: 2; pointer-events: none; }
         #seek-markers { position: absolute; top: 0; left: 0; width: 100%; height: 100%; pointer-events: none; z-index: 3; }
         .chap-marker { position: absolute; width: 2px; height: 6px; background: rgba(255,255,255,0.4); top: 5px; transform: translateX(-50%); }
     
         input[type=range] { width: 100%; cursor: pointer; height: 16px; background: transparent; -webkit-appearance: none; position: relative; z-index: 4; margin: 0; }
-        input[type=range]::-webkit-slider-thumb { -webkit-appearance: none; height: 16px; width: 16px; border-radius: 50%; background: #fff; margin-top: -6px; box-shadow: 0 1px 3px rgba(0,0,0,0.5); }
+        input[type=range]::-webkit-slider-thumb { -webkit-appearance: none; height: 16px; width: 16px; border-radius: 50%; background: var(--rp-text); margin-top: -6px; box-shadow: 0 1px 3px rgba(0,0,0,0.5); }
         input[type=range]::-webkit-slider-runnable-track { width: 100%; height: 4px; background: transparent; }
-        input[type=range]::-moz-range-thumb { height: 16px; width: 16px; border-radius: 50%; background: #fff; border: none; box-shadow: 0 1px 3px rgba(0,0,0,0.5); }
+        input[type=range]::-moz-range-thumb { height: 16px; width: 16px; border-radius: 50%; background: var(--rp-text); border: none; box-shadow: 0 1px 3px rgba(0,0,0,0.5); }
         input[type=range]::-moz-range-track { width: 100%; height: 4px; background: transparent; }
     
         .buttons-row { display: flex; justify-content: center; gap: 25px; align-items: center; }
-        .round-btn { width: 50px; height: 50px; border-radius: 50%; border: none; background: #2a2a2a; color: #ddd; font-size: 1.2rem; cursor: pointer; display: flex; align-items: center; justify-content: center; transition: all 0.1s; box-shadow: 0 2px 5px rgba(0,0,0,0.2); }
-        .round-btn:active { transform: scale(0.95); background: #444; }
-        .round-btn.main { width: 68px; height: 68px; background: #e0e0e0; color: #121212; font-size: 1.8rem; box-shadow: 0 4px 10px rgba(255,255,255,0.1); }
+        .round-btn { width: 50px; height: 50px; border-radius: 50%; border: 1px solid var(--rp-overlay); background: var(--rp-overlay); color: var(--rp-text); font-size: 1.2rem; cursor: pointer; display: flex; align-items: center; justify-content: center; transition: all 0.1s; box-shadow: 0 2px 5px rgba(0,0,0,0.2); }
+        .round-btn:hover { border-color: var(--rp-muted); }
+        .round-btn:active { transform: scale(0.95); background: var(--rp-surface); }
+        .round-btn.main { width: 68px; height: 68px; background: var(--rp-rose); color: var(--rp-base); font-size: 1.8rem; box-shadow: 0 4px 14px rgba(235,188,186,0.14); }
     
-        #view-focus { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: #000; z-index: 100; display: flex; flex-direction: column; justify-content: center; align-items: center; padding: 40px; text-align: center; }
+        #view-focus { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: var(--rp-base); z-index: 100; display: flex; flex-direction: column; justify-content: center; align-items: center; padding: 40px; text-align: center; }
         #focus-text { 
             font-family: var(--font-reader); 
             font-size: calc(var(--font-size-base) * 1.5); 
             font-weight: var(--active-weight); 
-            color: #e0e0e0; 
+            color: var(--rp-text);
             line-height: 1.4; 
             max-width: var(--focus-width); 
             width: 100%;
             user-select: text; -webkit-user-select: text; 
             text-wrap: balance; 
         }
-        #focus-hint { position: absolute; bottom: 20px; color: #333; font-size: 0.8rem; font-family: sans-serif; opacity: 0; transition: opacity 0.5s; user-select: none; }
+        #focus-hint { position: absolute; bottom: 20px; color: var(--rp-muted); font-size: 0.8rem; font-family: sans-serif; opacity: 0; transition: opacity 0.5s; user-select: none; }
         #view-focus:hover #focus-hint { opacity: 1; }
     
         @media (max-width: 600px) {
             #chapter-list { width: 85%; }
+            .media-stage { flex-basis: 28vh; min-height: 140px; }
             #sub-list li.active { transform: none; /* Mobile scale handling override if needed */ }
             #sub-list li.active .text-container { transform: scale(var(--active-scale)); }
         }
@@ -248,16 +276,16 @@
             align-items: center;
             gap: 10px;
             width: 100%;
-            background: #1a1a1a;
+            background: var(--rp-surface);
             padding: 10px 15px;
             border-radius: 8px;
-            border: 1px solid #333;
+            border: 1px solid var(--rp-overlay);
             margin-top: 10px;
         }
         .gen-progress-bar {
             flex: 1;
             height: 10px;
-            background: #000;
+            background: var(--rp-base);
             border-radius: 5px;
             overflow: hidden;
             position: relative;
@@ -270,7 +298,7 @@
         }
         .gen-progress-text {
             font-size: 0.8rem;
-            color: #888;
+            color: var(--rp-subtle);
             min-width: 50px;
             text-align: right;
         }
@@ -286,7 +314,7 @@
         }
         .popover {
             background: var(--surface);
-            border: 1px solid #333;
+            border: 1px solid var(--rp-overlay);
             padding: 20px;
             border-radius: 8px;
             box-shadow: 0 10px 25px rgba(0,0,0,0.5);
@@ -304,9 +332,9 @@
         .popover-input {
             width: 100%;
             padding: 8px;
-            background: #121212;
-            border: 1px solid #333;
-            color: #fff;
+            background: var(--rp-base);
+            border: 1px solid var(--rp-muted);
+            color: var(--rp-text);
             border-radius: 4px;
         }
     </style>
@@ -324,9 +352,9 @@
     <div id="modal-file-req" class="modal-overlay hidden">
         <div class="modal">
             <h2 style="margin-top:0; color: var(--primary);">Load File</h2>
-            <div style="color:#ccc; margin-bottom: 20px; line-height:1.5;">
+            <div style="color:var(--rp-subtle); margin-bottom: 20px; line-height:1.5;">
                 This book is not cached. Please select the following file:
-                <div style="background:#111; padding:10px; border-radius:6px; margin-top:10px; font-family:monospace; color:#fff;" id="req-filename">...</div>
+                <div style="background:var(--rp-base); padding:10px; border-radius:6px; margin-top:10px; font-family:monospace; color:var(--rp-text);" id="req-filename">...</div>
             </div>
             <div style="text-align: right;">
                 <button class="btn" onclick="document.getElementById('modal-file-req').classList.add('hidden')">Cancel</button>
@@ -345,7 +373,7 @@
             <div class="setting-row"><label>Active Line Scale</label><div class="setting-input-group"><input type="number" id="opt-active-scale" min="1.0" max="2.0" step="0.05" value="1.05" onchange="App.applySettings()" style="width:70px"></div></div>
             <div class="setting-row"><label>Bold Active Line</label><input type="checkbox" id="opt-bold" onchange="App.applySettings()" style="width:20px; height:20px; accent-color: var(--primary);"></div>
             <div class="setting-row"><label>Fill Silence (Gaps)</label><input type="checkbox" id="opt-fill" checked onchange="App.applySettings()" style="width:20px; height:20px; accent-color: var(--primary);"></div>
-            <div class="setting-row"><label>API Server Endpoint</label><div class="setting-input-group"><input type="text" id="opt-api-endpoint" value="http://localhost:8000" onchange="Furigana.saveApiEndpoint()" style="width:160px; font-size: 0.8rem;"></div></div>
+            <div class="setting-row"><label>API Server Endpoint</label><div class="setting-input-group"><input type="text" id="opt-api-endpoint" value="" placeholder="Same origin" onchange="Furigana.saveApiEndpoint()" style="width:160px; font-size: 0.8rem;"></div></div>
             <div style="text-align: right; margin-top:20px;"><button class="btn btn-primary" onclick="App.toggleModal('modal-settings')">Done</button></div>
         </div>
     </div>
@@ -386,20 +414,20 @@
     
     <!-- LIBRARY -->
     <div id="view-library">
-        <h1 style="color: var(--primary); letter-spacing: 2px; font-weight: normal; margin-bottom: 20px;">kikiyomi</h1>
+        <h1 style="color: var(--primary); letter-spacing: 2px; font-weight: normal; margin-bottom: 20px;">tsubuyaki</h1>
         
         <div id="drop-zone" class="drop-zone">
-            <div style="font-size: 2rem; opacity: 0.7;">🎧</div>
+            <div style="font-size: 2rem; opacity: 0.85;">🌹</div>
             <div style="display:flex; flex-direction:column; align-items: flex-start;">
-                <div style="color: #e0e0e0; font-weight: bold; font-size: 1rem;">Open Audio File</div>
-                <div style="color: #666; font-size: 0.8rem;">.m4b, .mp3 + .srt</div>
+                <div style="color: var(--rp-text); font-weight: bold; font-size: 1rem;">Open Media &amp; Subtitles</div>
+                <div style="color: var(--rp-subtle); font-size: 0.8rem;">Video: MP4, WebM, MKV, MOV, M4V, OGV, AVI · Audio: MP3, M4A, M4B, AAC, OGG, OPUS, WAV, FLAC · SRT/JSON</div>
             </div>
-            <input type="file" id="file-input" hidden multiple accept=".mp3,.m4b,.aac,.srt,.json,.m4a">
+            <input type="file" id="file-input" hidden multiple accept="video/*,audio/*,.mp4,.m4v,.webm,.mov,.mkv,.ogv,.avi,.mpeg,.mpg,.mp3,.m4b,.aac,.m4a,.ogg,.oga,.opus,.wav,.flac,.srt,.json">
         </div>
 
-        <h3 style="align-self: flex-start; margin-bottom: 10px; color: #555; font-size: 0.9rem; text-transform: uppercase; letter-spacing: 1px;">Library</h3>
+        <h3 style="align-self: flex-start; margin-bottom: 10px; color: var(--rp-muted); font-size: 0.9rem; text-transform: uppercase; letter-spacing: 1px;">Library</h3>
         <div id="library-list"></div>
-        <div class="version-footer">v0.0.4</div>
+        <div class="version-footer">tsubuyaki · v0.1.0</div>
     </div>
     
     <!-- PLAYER -->
@@ -418,14 +446,14 @@
             </div>
         </header>
 
-        <div id="furigana-toolbar" class="hidden" style="padding: 10px; background: #1a1a1a; border-bottom: 1px solid #333; display: flex; align-items: center; justify-content: space-between; gap: 10px; flex-wrap: wrap; z-index: 10; position: relative;">
+        <div id="furigana-toolbar" class="hidden" style="padding: 10px; background: var(--rp-surface); border-bottom: 1px solid var(--rp-overlay); display: flex; align-items: center; justify-content: space-between; gap: 10px; flex-wrap: wrap; z-index: 10; position: relative;">
             <div style="display: flex; align-items: center; gap: 10px;">
                 <button class="btn btn-primary" id="btn-gen-furigana" onclick="Furigana.generate()">Tạo Furigana</button>
                 <button class="btn hidden" id="btn-cancel-gen" onclick="Furigana.cancel()">Hủy</button>
-                <span id="gen-status" style="font-size: 0.85rem; color: #888;">Backend: Offline</span>
+                <span id="gen-status" style="font-size: 0.85rem; color: var(--rp-subtle);">Backend: Offline</span>
             </div>
             <div style="display: flex; align-items: center; gap: 8px;">
-                <label style="font-size: 0.8rem; color: #aaa;">Furigana:</label>
+                <label style="font-size: 0.8rem; color: var(--rp-subtle);">Furigana:</label>
                 <button class="btn" id="btn-toggle-ruby" onclick="Furigana.toggleRuby()">Hiện</button>
                 <input type="number" id="opt-ruby-size" min="30" max="80" value="50" onchange="Furigana.applyRubySize()" style="width: 55px; padding: 4px;" title="Ruby size (%)">
             </div>
@@ -434,7 +462,7 @@
                 <button class="btn" onclick="Furigana.exportSrt()" title="Tải xuống .furigana.srt">Export SRT</button>
             </div>
         </div>
-        <div id="gen-progress-row" class="hidden" style="padding: 0 10px 10px 10px; background: #1a1a1a; border-bottom: 1px solid #333;">
+        <div id="gen-progress-row" class="hidden" style="padding: 0 10px 10px 10px; background: var(--rp-surface); border-bottom: 1px solid var(--rp-overlay);">
             <div class="gen-progress-container">
                 <div class="gen-progress-bar">
                     <div class="gen-progress-fill" id="gen-progress-fill"></div>
@@ -444,6 +472,10 @@
         </div>
     
         <div id="player-content">
+            <div id="media-stage" class="media-stage hidden">
+                <video id="media-el" playsinline preload="metadata"></video>
+                <div id="media-error" class="media-error hidden" role="alert"></div>
+            </div>
             <ul id="sub-list"></ul>
         </div>
         
@@ -475,7 +507,6 @@
         <div id="focus-hint">Tap Center: Play • Tap Sides: Seek • Hold/Esc: Exit</div>
     </div>
     
-    <audio id="audio-el" hidden></audio>
     <script>
     // --- UTILS ---
     const Utils = {
@@ -496,6 +527,26 @@
             return `${m}:${sec.toString().padStart(2,'0')}`;
         }
     };
+
+    const AUDIO_EXTENSIONS = new Set([
+        'mp3', 'm4b', 'aac', 'm4a', 'ogg', 'oga', 'opus', 'wav', 'flac'
+    ]);
+    const VIDEO_EXTENSIONS = new Set([
+        'mp4', 'm4v', 'webm', 'mov', 'mkv', 'ogv', 'avi', 'mpeg', 'mpg'
+    ]);
+    const MEDIA_EXTENSIONS = new Set([...AUDIO_EXTENSIONS, ...VIDEO_EXTENSIONS]);
+
+    function getExtension(name = '') {
+        const parts = name.toLowerCase().split('.');
+        return parts.length > 1 ? parts.pop() : '';
+    }
+
+    function getMediaKind(file) {
+        const extension = getExtension(file?.name || '');
+        if (VIDEO_EXTENSIONS.has(extension) || file?.type?.startsWith('video/')) return 'video';
+        if (AUDIO_EXTENSIONS.has(extension) || file?.type?.startsWith('audio/')) return 'audio';
+        return null;
+    }
 
     // --- PARSERS ---
     const M4BParser = {
@@ -760,12 +811,15 @@
             this.renderLibrary();
             const dz = document.getElementById('drop-zone');
             
-            dz.onclick = () => {
-                if ('showOpenFilePicker' in window) { this.pickFile(); } 
-                else { document.getElementById('file-input').click(); }
-            };
+            // The standard picker works on desktop and mobile and supports
+            // selecting the media file together with its subtitle file.
+            dz.onclick = () => document.getElementById('file-input').click();
             
-            document.getElementById('file-input').onchange = (e) => this.handleFiles(e.target.files);
+            document.getElementById('file-input').onchange = (e) => {
+                const selectedFiles = Array.from(e.target.files);
+                e.target.value = '';
+                this.handleFiles(selectedFiles);
+            };
             document.getElementById('srt-upload').onchange = (e) => this.handleSubUpload(e.target.files[0]);
             ['dragenter', 'dragover', 'dragleave', 'drop'].forEach(n => {
                 document.body.addEventListener(n, e => { e.preventDefault(); e.stopPropagation(); }, false);
@@ -802,7 +856,14 @@
         async pickFile() {
             try {
                 const handles = await window.showOpenFilePicker({
-                    types: [{ description: 'Audio & Subtitles', accept: { 'audio/*': ['.mp3', '.m4b', '.aac', '.m4a'], 'text/plain': ['.srt', '.json'] } }],
+                    types: [{
+                        description: 'Media & Subtitles',
+                        accept: {
+                            'video/*': ['.mp4', '.m4v', '.webm', '.mov', '.mkv', '.ogv', '.avi', '.mpeg', '.mpg'],
+                            'audio/*': ['.mp3', '.m4b', '.aac', '.m4a', '.ogg', '.oga', '.opus', '.wav', '.flac'],
+                            'text/plain': ['.srt', '.json']
+                        }
+                    }],
                     multiple: true
                 });
                 const files = [];
@@ -879,7 +940,7 @@
                 
                 const pct = book.duration > 0 ? (book.progress / book.duration * 100).toFixed(1) : 0;
                 
-                let imgHtml = '<div class="lib-cover">💿</div>';
+                let imgHtml = `<div class="lib-cover">${book.mediaKind === 'video' ? '🎬' : '💿'}</div>`;
                 if (book.cover && book.cover.blob) {
                     const url = URL.createObjectURL(book.cover.blob);
                     imgHtml = `<img class="lib-cover" src="${url}">`;
@@ -899,7 +960,7 @@
             });
             
             if (list.children.length === 0) {
-                list.innerHTML = '<div style="text-align:center; padding:20px; color:#444;">Library is empty</div>';
+                list.innerHTML = '<div style="text-align:center; padding:20px; color:var(--rp-muted);">Library is empty</div>';
             }
         },
         async showBookmarks() {
@@ -949,7 +1010,7 @@
             
             list.innerHTML = '';
             if(bookmarks.length === 0) {
-                list.innerHTML = '<div style="padding:20px; text-align:center; color:#666;">No bookmarks found.</div>';
+                list.innerHTML = '<div style="padding:20px; text-align:center; color:var(--rp-muted);">No bookmarks found.</div>';
                 return;
             }
             
@@ -1009,7 +1070,7 @@
             const url = URL.createObjectURL(blob);
             const link = document.createElement("a");
             link.setAttribute("href", url);
-            link.setAttribute("download", "kikiyomi_bookmarks.csv");
+            link.setAttribute("download", "tsubuyaki_bookmarks.csv");
             document.body.appendChild(link);
             link.click();
             document.body.removeChild(link);
@@ -1027,11 +1088,10 @@
             document.getElementById('loading-overlay').classList.remove('hidden');
             setTimeout(async () => {
                 try {
-                    let audioFile = null, srtFile = null, jsonSubFile = null, jsonChapFile = null;
-                    const getExt = (name) => name.split('.').pop().toLowerCase();
+                    let mediaFile = null, srtFile = null, jsonSubFile = null, jsonChapFile = null;
                     for (let f of files) {
-                        const ext = getExt(f.name);
-                        if (['mp3','m4b','aac','mp4','m4a'].includes(ext)) audioFile = f;
+                        const ext = getExtension(f.name);
+                        if (MEDIA_EXTENSIONS.has(ext) || getMediaKind(f)) mediaFile = f;
                         if (ext === 'srt') srtFile = f;
                         if (ext === 'json') {
                             if (f.name.endsWith('.furigana.json')) {
@@ -1041,21 +1101,25 @@
                             }
                         }
                     }
-                    if (audioFile) {
-                        const id = "b_" + Math.abs(this.hashCode(audioFile.name));
+                    if (mediaFile) {
+                        const mediaKind = getMediaKind(mediaFile);
+                        const id = "b_" + Math.abs(this.hashCode(mediaFile.name));
                         let meta = (await DB.getAllMetadata()).find(b => b.id === id);
                         if (!meta) {
                             meta = {
-                                id: id, title: audioFile.name.replace(/\.(mp3|m4b|aac|mp4|m4a)$/i, ''),
+                                id: id, title: mediaFile.name.replace(/\.[^.]+$/i, ''),
                                 duration: 0, progress: 0, lastPlayed: Date.now(), subs: [], chapters: [], bookmarks: [], cover: null
                             };
                         }
-                        if (audioFile.handle) meta.handle = audioFile.handle;
+                        meta.mediaKind = mediaKind;
+                        meta.fileName = mediaFile.name;
+                        if (mediaFile.handle) meta.handle = mediaFile.handle;
                         if (!meta.bookmarks) meta.bookmarks = []; // Schema migration
                         
                         let parsed = {};
-                        if (getExt(audioFile.name) === 'mp3') parsed = await ID3Parser.parse(audioFile);
-                        else parsed = await M4BParser.parse(audioFile);
+                        const mediaExt = getExtension(mediaFile.name);
+                        if (mediaExt === 'mp3') parsed = await ID3Parser.parse(mediaFile);
+                        else if (['m4b', 'm4a', 'aac'].includes(mediaExt)) parsed = await M4BParser.parse(mediaFile);
                         
                         if (parsed.chapters && parsed.chapters.length) meta.chapters = parsed.chapters;
                         if (parsed.cover) meta.cover = parsed.cover;
@@ -1069,15 +1133,15 @@
                         
                         if (jsonChapFile) meta.chapters = await this.parseJsonChapters(jsonChapFile);
                         
-                        await DB.setActiveAudio(audioFile);
+                        await DB.setActiveAudio(mediaFile);
                         await DB.saveMetadata(meta);
                         localStorage.setItem('activeBookId', id);
                         this.currentBook = meta;
-                        this.activeAudioBlob = audioFile;
+                        this.activeAudioBlob = mediaFile;
                         this.launchPlayer();
-                    } else if (srtFile) { alert("Please drop the audio file too, or drag the .srt file into the player once the audio is loaded."); }
-                    else if (jsonSubFile) { alert("Please drop the audio file too."); }
-                    else { alert("Please drop the Audio File."); }
+                    } else if (srtFile) { alert("Please add the media file too, or drop the .srt file into the player after media is loaded."); }
+                    else if (jsonSubFile) { alert("Please add the media file too."); }
+                    else { alert("No supported media file was selected."); }
                 } catch (e) { console.error(e); alert("Error processing file."); } 
                 finally { document.getElementById('loading-overlay').classList.add('hidden'); }
             }, 50);
@@ -1139,7 +1203,7 @@
     
             this.pendingBookId = id;
             this.pendingSeek = seekTo;
-            document.getElementById('req-filename').textContent = book.title + " (Audio File)";
+            document.getElementById('req-filename').textContent = book.fileName || (book.title + " (Media File)");
             document.getElementById('modal-file-req').classList.remove('hidden');
         },
         pendingBookId: null,
@@ -1212,7 +1276,14 @@
     };
     
     const Player = {
-        audio: document.getElementById('audio-el'),
+        // Keep the historical property name so the original kikiyomi controls
+        // continue to work. HTMLVideoElement implements the same media API and
+        // also plays audio-only files.
+        audio: document.getElementById('media-el'),
+        mediaStage: document.getElementById('media-stage'),
+        mediaError: document.getElementById('media-error'),
+        elPlayerContent: document.getElementById('player-content'),
+        objectUrl: null,
         meta: null, subs: [],
         elTitle: document.getElementById('player-title'), elSubList: document.getElementById('sub-list'),
         elSeek: document.getElementById('seek-bar'), elFill: document.getElementById('seek-fill'), elMarkers: document.getElementById('seek-markers'),
@@ -1242,8 +1313,15 @@
             Furigana.checkBackendStatus();
 
             this.elTitle.textContent = meta.title;
-            this.audio.src = URL.createObjectURL(blob);
-            this.audio.currentTime = seekTo !== null ? seekTo : (meta.progress || 0);
+            const mediaKind = meta.mediaKind || getMediaKind(blob) || 'audio';
+            meta.mediaKind = mediaKind;
+            this.mediaStage.classList.toggle('hidden', mediaKind !== 'video');
+            this.elPlayerContent.classList.toggle('has-video', mediaKind === 'video');
+            this.mediaError.classList.add('hidden');
+            this.mediaError.textContent = '';
+            if (this.objectUrl) URL.revokeObjectURL(this.objectUrl);
+            this.objectUrl = URL.createObjectURL(blob);
+            this.audio.src = this.objectUrl;
             
             this.renderSubs(); this.renderChapters();
             this.audio.onloadedmetadata = () => {
@@ -1251,7 +1329,14 @@
                 this.elTTotal.textContent = Utils.fmtTime(this.audio.duration);
                 if (this.meta.duration !== this.audio.duration) { this.meta.duration = this.audio.duration; this.save(); }
                 this.renderMarkers();
-                if(seekTo !== null) this.audio.currentTime = seekTo; // Ensure seek
+                const targetTime = seekTo !== null ? seekTo : (meta.progress || 0);
+                if (Number.isFinite(targetTime) && targetTime > 0) this.audio.currentTime = targetTime;
+            };
+            this.audio.onerror = () => {
+                if (mediaKind !== 'video') return;
+                const ext = getExtension(meta.fileName || blob.name || '').toUpperCase() || 'này';
+                this.mediaError.textContent = `Trình duyệt không giải mã được video ${ext}. Tên đuôi được hỗ trợ để chọn tệp, nhưng codec bên trong vẫn phải tương thích với trình duyệt. Hãy remux sang WebM (VP9/Opus) hoặc MP4 (H.264/AAC) rồi thử lại.`;
+                this.mediaError.classList.remove('hidden');
             };
             this.audio.ontimeupdate = () => {
                 if (!this.isSeeking) { 
@@ -1264,13 +1349,14 @@
             };
             this.audio.onplay = () => this.updateBtn();
             this.audio.onpause = () => { this.updateBtn(); this.save(); };
+            this.audio.load();
         },
         renderSubs() {
             this.elSubList.innerHTML = '';
             if (this.subs.length === 0) { 
                 this.elSubList.innerHTML = `
                     <div class="srt-empty-container">
-                        <div class="srt-empty" onclick="if('showOpenFilePicker' in window){App.pickFile()}else{document.getElementById('file-input').click()}">
+                        <div class="srt-empty" onclick="document.getElementById('srt-upload').click()">
                             <div class="srt-empty-icon">📝</div>
                             <div style="font-weight:bold; font-size:1.2rem; margin-bottom:5px;">No Subtitles Loaded</div>
                             <div style="font-size:0.9rem;">Drop .srt / .json here or click to add</div>
@@ -1278,7 +1364,7 @@
                     </div>`; 
                 const emptyZone = this.elSubList.querySelector('.srt-empty');
                 emptyZone.addEventListener('dragover', e => { e.preventDefault(); emptyZone.style.borderColor = 'var(--primary)'; });
-                emptyZone.addEventListener('dragleave', e => { e.preventDefault(); emptyZone.style.borderColor = '#333'; });
+                emptyZone.addEventListener('dragleave', e => { e.preventDefault(); emptyZone.style.borderColor = 'var(--rp-muted)'; });
                 emptyZone.addEventListener('drop', e => { e.preventDefault(); e.stopPropagation(); if(e.dataTransfer.files.length > 0) App.handleSubUpload(e.dataTransfer.files[0]); });
                 return; 
             }
@@ -1382,7 +1468,11 @@
                 this.activeIndex = idx;
                 if (idx !== -1) {
                     const el = document.getElementById(`s-${idx}`);
-                    if(el) { el.classList.add('active'); el.scrollIntoView({ behavior: 'smooth', block: 'center' }); }
+                    if(el) {
+                        el.classList.add('active');
+                        const targetTop = el.offsetTop - (this.elSubList.clientHeight - el.offsetHeight) / 2;
+                        this.elSubList.scrollTo({ top: Math.max(0, targetTop), behavior: 'smooth' });
+                    }
                     Furigana.renderSegments(this.elFocusText, this.subs[idx].segments);
                 } else {
                     this.elFocusText.textContent = "...";
@@ -1504,7 +1594,7 @@
     const Furigana = {
         visible: true,
         rubySize: 50,
-        apiEndpoint: "http://localhost:8000",
+        apiEndpoint: window.location.origin,
         isGenerating: false,
         abortController: null,
         activeEditSeg: null,
@@ -1513,7 +1603,7 @@
         init() {
             this.visible = localStorage.getItem('ky_furi_visible') !== "false";
             this.rubySize = parseInt(localStorage.getItem('ky_furi_size') || "50");
-            this.apiEndpoint = localStorage.getItem('ky_furi_api') || "http://localhost:8000";
+            this.apiEndpoint = localStorage.getItem('ky_furi_api') || window.location.origin;
 
             document.getElementById('btn-toggle-ruby').textContent = this.visible ? "Ẩn" : "Hiện";
             document.getElementById('opt-ruby-size').value = this.rubySize;
@@ -1525,8 +1615,9 @@
         },
 
         saveApiEndpoint() {
-            this.apiEndpoint = document.getElementById('opt-api-endpoint').value.trim();
-            localStorage.setItem('ky_furi_api', this.apiEndpoint);
+            const configured = document.getElementById('opt-api-endpoint').value.trim();
+            this.apiEndpoint = (configured || window.location.origin).replace(/\/$/, '');
+            localStorage.setItem('ky_furi_api', configured);
             this.checkBackendStatus();
         },
 
@@ -1571,11 +1662,11 @@
                     }
                 } else {
                     statusEl.textContent = "Backend: Offline";
-                    statusEl.style.color = "#888";
+                    statusEl.style.color = "var(--rp-muted)";
                 }
             } catch(e) {
                 statusEl.textContent = "Backend: Offline";
-                statusEl.style.color = "#888";
+                statusEl.style.color = "var(--rp-muted)";
             }
         },
 

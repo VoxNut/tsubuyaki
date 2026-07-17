@@ -30,6 +30,7 @@ RUN --mount=type=cache,target=/root/.cache/pip,sharing=locked \
       -r /tmp/requirements-core.txt
 
 COPY backend/src /app/backend/src
+COPY frontend /app/frontend
 COPY LICENSE NOTICE.md README.md /app/
 
 RUN mkdir -p /home/app/.cache/huggingface/hub \

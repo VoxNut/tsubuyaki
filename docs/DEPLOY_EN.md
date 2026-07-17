@@ -1,4 +1,4 @@
-# Furigana Aid Reader Deployment Guide
+# tsubuyaki Deployment Guide
 
 This document provides detailed instructions on how to package the backend service, upload model artifacts to a private Hugging Face Hub repository, and deploy the application.
 
