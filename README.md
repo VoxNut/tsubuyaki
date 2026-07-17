@@ -10,7 +10,7 @@ models:
   - voxnuts947/furigana-aid-model
 datasets:
   - Calvin-Xu/Furigana-Aozora
-short_description: Context-aware Japanese media reader with BERT, MLP, and MeCab furigana.
+short_description: Japanese media reader with BERT + MLP furigana.
 ---
 
 **English** | [Tiếng Việt](README.vi.md) | [日本語](README.ja.md)
