@@ -5,9 +5,9 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <meta name="theme-color" content="#191724">
     <title>tsubuyaki</title>
-    <link rel="icon" type="image/png" href="regular-icon.png?v=5">
-    <link rel="apple-touch-icon" href="regular-icon.png?v=5">
-    <link rel="manifest" href="manifest.json?v=5">
+    <link rel="icon" type="image/png" href="regular-icon.png?v=6">
+    <link rel="apple-touch-icon" href="regular-icon.png?v=6">
+    <link rel="manifest" href="manifest.json?v=6">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <style>
@@ -50,6 +50,18 @@
         
         /* --- UTILS --- */
         .hidden { display: none !important; }
+        .svg-sprite { position: absolute; width: 0; height: 0; overflow: hidden; pointer-events: none; }
+        .app-icon {
+            width: 1.15rem;
+            height: 1.15rem;
+            display: block;
+            flex: 0 0 auto;
+            fill: none;
+            stroke: currentColor;
+            stroke-width: 1.8;
+            stroke-linecap: round;
+            stroke-linejoin: round;
+        }
         .btn { min-height: 38px; background: var(--rp-overlay); color: var(--rp-text); border: 1px solid var(--border); padding: 8px 14px; border-radius: 10px; cursor: pointer; font-size: 0.88rem; transition: background 0.2s, border-color 0.2s, transform 0.1s; font-family: var(--font-ui); }
         .btn:hover { background: var(--rp-surface); border-color: var(--rp-iris); }
         .btn:active { background: var(--rp-surface); transform: scale(0.98); }
@@ -57,8 +69,10 @@
         .btn-primary:hover { background: var(--rp-rose); }
         .icon-btn { min-width: 38px; height: 38px; display: inline-grid; place-items: center; background: transparent; border: 1px solid transparent; border-radius: 10px; color: var(--rp-subtle); font-size: 1.1rem; cursor: pointer; padding: 0; margin: 0; }
         .icon-btn:hover { color: var(--rp-text); background: var(--rp-overlay); border-color: var(--border); }
+        .icon-btn .app-icon { width: 1.1rem; height: 1.1rem; }
         .del-btn { color: var(--rp-muted); font-size: 1.2rem; padding: 0 15px; cursor: pointer; background: transparent; border:none; height: 100%; display: flex; align-items: center; }
         .del-btn:hover { color: var(--rp-love); }
+        .del-btn .app-icon, .bm-del-btn .app-icon { width: 1.05rem; height: 1.05rem; }
         
         /* --- MODALS --- */
         .modal-overlay { position: fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.8); z-index: 200; display:flex; justify-content:center; align-items:center; backdrop-filter: blur(2px); }
@@ -95,6 +109,7 @@
         .drop-zone { width: 100%; min-height: 112px; border: 2px dashed var(--rp-muted); border-radius: 16px; display: flex; flex-direction: row; gap: 15px; justify-content: center; align-items: center; background: var(--rp-surface); margin-bottom: 20px; transition: border-color 0.2s, background 0.2s, transform 0.2s; cursor: pointer; flex-shrink: 0; }
         .drop-zone:hover { border-color: var(--rp-iris); background: var(--rp-overlay); transform: translateY(-1px); }
         .drop-zone.dragover { border-color: var(--rp-foam); background: var(--rp-overlay); }
+        .drop-zone-icon { width: 2.35rem; height: 2.35rem; color: var(--rp-rose); stroke-width: 1.55; filter: drop-shadow(0 5px 12px color-mix(in srgb, var(--rp-rose) 22%, transparent)); }
         
         #library-list { width: 100%; display: flex; flex-direction: column; gap: 10px; }
 
@@ -103,6 +118,7 @@
         .lib-item:active { transform: scale(0.99); }
         .lib-item.active-book { border: 2px solid var(--primary); background: var(--rp-overlay); }
         .lib-cover { width: 60px; height: 60px; background: var(--rp-base); border-radius: 8px; object-fit: cover; margin-right: 15px; flex-shrink: 0; display: flex; align-items: center; justify-content: center; font-size: 1.5rem; color: var(--rp-muted); }
+        .lib-cover .app-icon { width: 1.7rem; height: 1.7rem; color: var(--rp-iris); stroke-width: 1.55; }
         .lib-info { flex: 1; min-width: 0; display: flex; flex-direction: column; justify-content: center; }
         .lib-title { font-weight: bold; font-size: 1rem; margin-bottom: 5px; color: var(--rp-text); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
         .lib-meta { color:var(--rp-subtle); font-size:0.75rem; display: flex; align-items: center; gap: 6px; }
@@ -124,7 +140,7 @@
         #player-title-container { min-width: 0; display: flex; justify-content: center; align-items: center; }
         #player-title { font-weight: 650; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 100%; font-size: 0.9rem; color: var(--rp-subtle); }
         .header-action { display: inline-flex; align-items: center; gap: 7px; }
-        .header-icon { font-size: 1rem; line-height: 1; }
+        .header-icon { width: 1.05rem; height: 1.05rem; color: var(--rp-iris); }
 
         #furigana-toolbar { min-height: 66px; padding: 10px 16px; background: var(--rp-surface); border-bottom: 1px solid var(--rp-overlay); display: grid; grid-template-columns: minmax(250px, 1fr) auto minmax(220px, 1fr); align-items: center; gap: 14px; z-index: 40; position: relative; }
         .toolbar-group { min-width: 0; display: flex; align-items: center; gap: 9px; }
@@ -211,7 +227,6 @@
         }
         #sub-list li::after { content: ""; width: 42px; }
         .star-btn { 
-            font-size: 1.5rem; 
             color: var(--rp-muted);
             cursor: pointer; 
             padding: 5px; 
@@ -219,15 +234,18 @@
             transition: color 0.2s, opacity 0.2s;
             user-select: none;
         }
+        .star-btn .app-icon { width: 1.35rem; height: 1.35rem; fill: transparent; transition: fill 0.2s ease; }
         #sub-list li:hover .star-btn { color: var(--rp-subtle); opacity: 1; }
         .star-btn:hover { color: var(--warn) !important; opacity: 1 !important; transform: scale(1.1); }
         .star-btn.filled { opacity: 1; color: var(--warn); }
+        .star-btn.filled .app-icon { fill: currentColor; }
         
         /* Empty State SRT Upload */
         .srt-empty-container { display: flex; flex-direction: column; justify-content: center; align-items: center; height: 100%; width: 100%; padding: 40px; box-sizing: border-box; }
         .srt-empty { width: 100%; height: 100%; max-width: 600px; max-height: 300px; border: 3px dashed var(--rp-muted); border-radius: 14px; display: flex; flex-direction: column; justify-content: center; align-items: center; color: var(--rp-subtle); cursor: pointer; transition: all 0.2s; background: var(--rp-surface); }
         .srt-empty:hover { border-color: var(--primary); color: var(--rp-text); background: var(--rp-overlay); transform: scale(1.01); }
-        .srt-empty-icon { font-size: 3rem; margin-bottom: 15px; opacity: 0.5; }
+        .srt-empty-icon { margin-bottom: 15px; opacity: 0.62; color: var(--rp-iris); }
+        .srt-empty-icon .app-icon { width: 3rem; height: 3rem; stroke-width: 1.35; }
     
         /* Chapters Sidebar */
         #chapter-list { position: absolute; top: 64px; bottom: 112px; right: 0; width: 320px; background: var(--rp-surface); border-left: 1px solid var(--rp-overlay); overflow-y: auto; display: none; z-index: 60; box-shadow: -5px 0 15px rgba(0,0,0,0.5); }
@@ -274,6 +292,8 @@
         .round-btn:hover { border-color: var(--rp-muted); }
         .round-btn:active { transform: scale(0.95); background: var(--rp-surface); }
         .round-btn.main { width: 56px; height: 56px; background: var(--rp-rose); color: var(--rp-base); font-size: 1.45rem; box-shadow: 0 6px 20px rgba(235,188,186,0.18); }
+        .round-btn .app-icon { width: 1.15rem; height: 1.15rem; }
+        .round-btn.main .app-icon { width: 1.55rem; height: 1.55rem; stroke-width: 2; }
     
         #view-focus { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: var(--rp-base); z-index: 100; display: flex; flex-direction: column; justify-content: center; align-items: center; padding: 40px; text-align: center; }
         #focus-text { 
@@ -317,7 +337,7 @@
             .media-stage { flex-basis: 28vh; min-height: 145px; }
             #sub-list li { width: 96%; grid-template-columns: 30px minmax(0, 1fr) 30px; padding: 12px 8px; line-height: 1.75; font-size: min(var(--font-size-base), 8vw); }
             #sub-list li::after { width: 30px; }
-            .star-btn { font-size: 1.05rem; }
+            .star-btn .app-icon { width: 1.05rem; height: 1.05rem; }
             #controls { height: 104px; padding: 9px 12px; }
             #sub-list li.active { transform: none; /* Mobile scale handling override if needed */ }
             #sub-list li.active .text-container { transform: none; }
@@ -448,6 +468,31 @@
     </style>
     </head>
     <body>
+
+    <svg class="svg-sprite" aria-hidden="true" focusable="false">
+        <defs>
+            <symbol id="icon-rose" viewBox="0 0 24 24">
+                <path d="M12 13.5c-3.7 0-6.5-2.2-6.5-5.1 0-2 1.4-3.6 3.4-4.2C9.5 2.3 11.5 1.4 13 2.7c2-.5 4 .6 4.6 2.5 1.7 1.1 2.1 3.5.8 5-1.3 2.1-3.5 3.3-6.4 3.3Z"/>
+                <path d="M8.3 8.2c1.4-1.7 5.1-2.1 7.4.2-1.6 2.1-5.4 2.3-7.4-.2ZM12 13.5V22M12 18c-2.1-1.5-4.2-1.2-5.6.3M12 17.5c2-1.4 4-1.2 5.4.2"/>
+            </symbol>
+            <symbol id="icon-arrow-left" viewBox="0 0 24 24"><path d="M19 12H5M12 19l-7-7 7-7"/></symbol>
+            <symbol id="icon-bookmark" viewBox="0 0 24 24"><path d="M6 4.5A2.5 2.5 0 0 1 8.5 2h7A2.5 2.5 0 0 1 18 4.5V22l-6-4-6 4Z"/></symbol>
+            <symbol id="icon-list" viewBox="0 0 24 24"><path d="M9 6h11M9 12h11M9 18h11"/><circle cx="4" cy="6" r="1"/><circle cx="4" cy="12" r="1"/><circle cx="4" cy="18" r="1"/></symbol>
+            <symbol id="icon-focus" viewBox="0 0 24 24"><path d="M8 3H5a2 2 0 0 0-2 2v3M16 3h3a2 2 0 0 1 2 2v3M21 16v3a2 2 0 0 1-2 2h-3M8 21H5a2 2 0 0 1-2-2v-3"/></symbol>
+            <symbol id="icon-sliders" viewBox="0 0 24 24"><path d="M4 6h7M15 6h5M4 12h2M10 12h10M4 18h10M18 18h2"/><circle cx="13" cy="6" r="2"/><circle cx="8" cy="12" r="2"/><circle cx="16" cy="18" r="2"/></symbol>
+            <symbol id="icon-help" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M9.8 9a2.4 2.4 0 1 1 3.8 2c-.9.6-1.6 1.1-1.6 2.3M12 17h.01"/></symbol>
+            <symbol id="icon-video" viewBox="0 0 24 24"><rect x="3" y="5" width="18" height="14" rx="3"/><path d="m10 9 5 3-5 3Z"/></symbol>
+            <symbol id="icon-headphones" viewBox="0 0 24 24"><path d="M4 14v-2a8 8 0 0 1 16 0v2M4 14a2 2 0 0 1 2-2h1v7H6a2 2 0 0 1-2-2ZM20 14a2 2 0 0 0-2-2h-1v7h1a2 2 0 0 0 2-2Z"/></symbol>
+            <symbol id="icon-file-text" viewBox="0 0 24 24"><path d="M6 2h8l4 4v16H6a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2Z"/><path d="M14 2v5h5M8 12h8M8 16h6"/></symbol>
+            <symbol id="icon-trash" viewBox="0 0 24 24"><path d="M4 7h16M9 7V4h6v3M7 7l1 14h8l1-14M10 11v6M14 11v6"/></symbol>
+            <symbol id="icon-star" viewBox="0 0 24 24"><path d="m12 2.7 2.9 5.9 6.5.9-4.7 4.6 1.1 6.5-5.8-3-5.8 3 1.1-6.5-4.7-4.6 6.5-.9Z"/></symbol>
+            <symbol id="icon-play" viewBox="0 0 24 24"><path d="m8 5 11 7-11 7Z"/></symbol>
+            <symbol id="icon-pause" viewBox="0 0 24 24"><path d="M9 5v14M15 5v14"/></symbol>
+            <symbol id="icon-skip-back" viewBox="0 0 24 24"><path d="M6 5v14M18 6l-8 6 8 6Z"/></symbol>
+            <symbol id="icon-replay" viewBox="0 0 24 24"><path d="M4 12a8 8 0 1 0 2.3-5.7L4 8.6M4 4v4.6h4.6"/></symbol>
+            <symbol id="icon-skip-forward" viewBox="0 0 24 24"><path d="M18 5v14M6 6l8 6-8 6Z"/></symbol>
+        </defs>
+    </svg>
     
     <input type="file" id="srt-upload" hidden accept=".srt,.json">
     
@@ -545,7 +590,7 @@
         <h1 style="color: var(--primary); letter-spacing: 2px; font-weight: normal; margin-bottom: 20px;">tsubuyaki</h1>
         
         <div id="drop-zone" class="drop-zone">
-            <div style="font-size: 2rem; opacity: 0.85;">🌹</div>
+            <svg class="app-icon drop-zone-icon" aria-hidden="true"><use href="#icon-rose"></use></svg>
             <div style="display:flex; flex-direction:column; align-items: flex-start;">
                 <div style="color: var(--rp-text); font-weight: bold; font-size: 1rem;">Open Media &amp; Subtitles</div>
                 <div style="color: var(--rp-subtle); font-size: 0.8rem;">Video: MP4, WebM, MKV, MOV, M4V, OGV, AVI · Audio: MP3, M4A, M4B, AAC, OGG, OPUS, WAV, FLAC · SRT/JSON</div>
@@ -562,18 +607,18 @@
     <div id="view-player" class="hidden">
         <header class="app-header">
             <div class="header-left">
-                <button class="btn header-action" onclick="App.showLibrary()"><span class="header-icon">←</span><span class="header-label">Library</span></button>
+                <button class="btn header-action" onclick="App.showLibrary()"><svg class="app-icon header-icon" aria-hidden="true"><use href="#icon-arrow-left"></use></svg><span class="header-label">Library</span></button>
                 <span class="brand-mark">TSUBUYAKI</span>
             </div>
             <div id="player-title-container">
                 <div id="player-title">...</div>
             </div>
             <div class="header-actions">
-                <button class="btn header-action" onclick="App.showBookmarks()" title="Bookmarks"><span class="header-icon">★</span><span class="header-label">Bookmarks</span></button>
-                <button class="btn header-action" onclick="App.toggleChapters()"><span class="header-icon">☰</span><span class="header-label">Chapters</span></button>
-                <button class="btn header-action" onclick="App.toggleFocusMode()"><span class="header-icon">⛶</span><span class="header-label">Focus</span></button>
-                <button class="icon-btn" onclick="App.toggleModal('modal-settings')" title="Settings" aria-label="Settings">⚙</button>
-                <button class="icon-btn" onclick="App.toggleModal('modal-help')" title="Keyboard shortcuts" aria-label="Keyboard shortcuts">?</button>
+                <button class="btn header-action" onclick="App.showBookmarks()" title="Bookmarks"><svg class="app-icon header-icon" aria-hidden="true"><use href="#icon-bookmark"></use></svg><span class="header-label">Bookmarks</span></button>
+                <button class="btn header-action" onclick="App.toggleChapters()"><svg class="app-icon header-icon" aria-hidden="true"><use href="#icon-list"></use></svg><span class="header-label">Chapters</span></button>
+                <button class="btn header-action" onclick="App.toggleFocusMode()"><svg class="app-icon header-icon" aria-hidden="true"><use href="#icon-focus"></use></svg><span class="header-label">Focus</span></button>
+                <button class="icon-btn" onclick="App.toggleModal('modal-settings')" title="Settings" aria-label="Settings"><svg class="app-icon" aria-hidden="true"><use href="#icon-sliders"></use></svg></button>
+                <button class="icon-btn" onclick="App.toggleModal('modal-help')" title="Keyboard shortcuts" aria-label="Keyboard shortcuts"><svg class="app-icon" aria-hidden="true"><use href="#icon-help"></use></svg></button>
             </div>
         </header>
 
@@ -634,10 +679,10 @@
                 <span id="t-total">00:00</span>
             </div>
             <div class="buttons-row">
-                <button class="round-btn" onclick="Player.prevSub()" title="Previous line (A)">I&lt;</button>
-                <button class="round-btn" onclick="Player.replaySub()" title="Replay Line (S)">⟲</button>
-                <button class="round-btn main" id="btn-play" onclick="Player.togglePlay()" title="Play/Pause (Space)">▶</button>
-                <button class="round-btn" onclick="Player.nextSub()" title="Next line (D)">&gt;I</button>
+                <button class="round-btn" onclick="Player.prevSub()" title="Previous line (A)" aria-label="Previous line"><svg class="app-icon" aria-hidden="true"><use href="#icon-skip-back"></use></svg></button>
+                <button class="round-btn" onclick="Player.replaySub()" title="Replay line (S)" aria-label="Replay line"><svg class="app-icon" aria-hidden="true"><use href="#icon-replay"></use></svg></button>
+                <button class="round-btn main" id="btn-play" onclick="Player.togglePlay()" title="Play (Space)" aria-label="Play"><svg class="app-icon" aria-hidden="true"><use href="#icon-play"></use></svg></button>
+                <button class="round-btn" onclick="Player.nextSub()" title="Next line (D)" aria-label="Next line"><svg class="app-icon" aria-hidden="true"><use href="#icon-skip-forward"></use></svg></button>
             </div>
         </div>
     </div>
@@ -668,6 +713,10 @@
             return `${m}:${sec.toString().padStart(2,'0')}`;
         }
     };
+
+    function iconSvg(name) {
+        return `<svg class="app-icon" aria-hidden="true" focusable="false"><use href="#icon-${name}"></use></svg>`;
+    }
 
     const AUDIO_EXTENSIONS = new Set([
         'mp3', 'm4b', 'aac', 'm4a', 'ogg', 'oga', 'opus', 'wav', 'flac'
@@ -991,7 +1040,7 @@
             });
             Input.init();
             if ('serviceWorker' in navigator) {
-                navigator.serviceWorker.register('service-worker.js?v=5').catch(err => console.warn('SW registration failed:', err));
+                navigator.serviceWorker.register('service-worker.js?v=6').catch(err => console.warn('SW registration failed:', err));
             }
         },
         async pickFile() {
@@ -1081,7 +1130,7 @@
                 
                 const pct = book.duration > 0 ? (book.progress / book.duration * 100).toFixed(1) : 0;
                 
-                let imgHtml = `<div class="lib-cover">${book.mediaKind === 'video' ? '🎬' : '💿'}</div>`;
+                let imgHtml = `<div class="lib-cover">${iconSvg(book.mediaKind === 'video' ? 'video' : 'headphones')}</div>`;
                 if (book.cover && book.cover.blob) {
                     const url = URL.createObjectURL(book.cover.blob);
                     imgHtml = `<img class="lib-cover" src="${url}">`;
@@ -1096,7 +1145,7 @@
                         <div class="progress-bar-mini"><div class="progress-fill-mini" style="width:${pct}%"></div></div>
                     </div>
                 </div>
-                <button class="del-btn" onclick="App.deleteBook('${book.id}', event)">×</button>`;
+                <button class="del-btn" onclick="App.deleteBook('${book.id}', event)" title="Remove from library" aria-label="Remove from library">${iconSvg('trash')}</button>`;
                 list.appendChild(div);
             });
             
@@ -1166,7 +1215,7 @@
                             <span>${Utils.fmtTime(bm.start)}</span>
                         </div>
                     </div>
-                    <button class="bm-del-btn" onclick="App.deleteBookmark('${bm.bookId}', ${bm.start}, event)">×</button>
+                    <button class="bm-del-btn" onclick="App.deleteBookmark('${bm.bookId}', ${bm.start}, event)" title="Delete bookmark" aria-label="Delete bookmark">${iconSvg('trash')}</button>
                 `;
                 list.appendChild(el);
             });
@@ -1511,7 +1560,7 @@
                 this.elSubList.innerHTML = `
                     <div class="srt-empty-container">
                         <div class="srt-empty" onclick="document.getElementById('srt-upload').click()">
-                            <div class="srt-empty-icon">📝</div>
+                            <div class="srt-empty-icon">${iconSvg('file-text')}</div>
                             <div style="font-weight:bold; font-size:1.2rem; margin-bottom:5px;">No Subtitles Loaded</div>
                             <div style="font-size:0.9rem;">Drop .srt / .json here or click to add</div>
                         </div>
@@ -1535,9 +1584,21 @@
                 starCol.className = 'star-col';
                 const star = document.createElement('div');
                 star.className = 'star-btn';
-                star.textContent = '★';
+                star.innerHTML = iconSvg('star');
+                star.setAttribute('role', 'button');
+                star.setAttribute('tabindex', '0');
+                star.setAttribute('title', 'Toggle bookmark');
+                star.setAttribute('aria-label', 'Toggle bookmark');
                 if(bookmarkedIndices.has(i)) star.classList.add('filled');
+                star.setAttribute('aria-pressed', bookmarkedIndices.has(i) ? 'true' : 'false');
                 star.onclick = (e) => { e.stopPropagation(); this.toggleBookmark(i, star); };
+                star.onkeydown = (e) => {
+                    if (e.key === 'Enter' || e.key === ' ') {
+                        e.preventDefault();
+                        e.stopPropagation();
+                        this.toggleBookmark(i, star);
+                    }
+                };
                 starCol.appendChild(star);
                 li.appendChild(starCol);
 
@@ -1571,6 +1632,7 @@
                 });
                 starEl.classList.add('filled');
             }
+            starEl.setAttribute('aria-pressed', starEl.classList.contains('filled') ? 'true' : 'false');
             this.save();
         },
         getChapTime(c) {
@@ -1694,7 +1756,12 @@
             for(let i=0; i<chaps.length; i++) if(this.getChapTime(chaps[i]) > t) { target = i; break; }
             if (target > -1) this.audio.currentTime = this.getChapTime(chaps[target]);
         },
-        updateBtn() { this.elBtnPlay.textContent = this.audio.paused ? "▶" : "❚❚"; },
+        updateBtn() {
+            const paused = this.audio.paused;
+            this.elBtnPlay.innerHTML = iconSvg(paused ? 'play' : 'pause');
+            this.elBtnPlay.setAttribute('aria-label', paused ? 'Play' : 'Pause');
+            this.elBtnPlay.setAttribute('title', `${paused ? 'Play' : 'Pause'} (Space)`);
+        },
         save() { if (!this.meta) return; this.meta.progress = this.audio.currentTime; this.meta.lastPlayed = Date.now(); DB.saveMetadata(this.meta); },
         isSeeking: false
     };

@@ -153,15 +153,15 @@
                 const ok = t.fn();
                 if (ok) {
                     el.classList.add('pass');
-                    el.textContent = "✓ PASS: " + t.name;
+                    el.textContent = "PASS: " + t.name;
                     passed++;
                 } else {
                     el.classList.add('fail');
-                    el.textContent = "✗ FAIL: " + t.name;
+                    el.textContent = "FAIL: " + t.name;
                 }
             } catch(e) {
                 el.classList.add('fail');
-                el.textContent = "✗ FAIL: " + t.name + " (" + e.message + ")";
+                el.textContent = "FAIL: " + t.name + " (" + e.message + ")";
             }
             resultsEl.appendChild(el);
         });

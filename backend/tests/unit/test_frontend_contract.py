@@ -100,15 +100,40 @@ def test_user_interface_is_english_only() -> None:
         assert english_text in html
 
 
+def test_user_interface_uses_svg_icons_instead_of_emoji() -> None:
+    html = (FRONTEND_DIR / "index.html").read_text(encoding="utf-8")
+
+    for icon_id in (
+        "icon-rose",
+        "icon-bookmark",
+        "icon-video",
+        "icon-headphones",
+        "icon-file-text",
+        "icon-star",
+        "icon-play",
+        "icon-pause",
+        "icon-trash",
+    ):
+        assert f'id="{icon_id}"' in html
+
+    for emoji_or_text_icon in (
+        "🌹", "🎬", "💿", "📝", "★", "☰", "⛶", "⚙", "▶", "❚❚",
+    ):
+        assert emoji_or_text_icon not in html
+
+    assert "function iconSvg(name)" in html
+    assert "fill: currentColor" in html
+
+
 def test_pwa_brand_and_cache_are_updated() -> None:
     manifest = (FRONTEND_DIR / "manifest.json").read_text(encoding="utf-8")
     service_worker = (FRONTEND_DIR / "service-worker.js").read_text(encoding="utf-8")
 
     assert '"name": "tsubuyaki"' in manifest
     assert '"theme_color": "#191724"' in manifest
-    assert "tsubuyaki-v5" in service_worker
-    assert '"src": "regular-icon.png?v=5"' in manifest
-    assert '"src": "maskable-icon.png?v=5"' in manifest
+    assert "tsubuyaki-v6" in service_worker
+    assert '"src": "regular-icon.png?v=6"' in manifest
+    assert '"src": "maskable-icon.png?v=6"' in manifest
     assert "fetch(e.request)" in service_worker
 
 
