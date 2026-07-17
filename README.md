@@ -10,7 +10,7 @@ models:
   - voxnuts947/furigana-aid-model
 datasets:
   - Calvin-Xu/Furigana-Aozora
-short_description: Context-aware Japanese furigana generation with BERT, MLP, and MeCab.
+short_description: Japanese furigana with BERT, MLP, and MeCab.
 ---
 
 # Furigana Aid Reader
