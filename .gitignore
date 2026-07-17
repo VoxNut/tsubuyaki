@@ -24,7 +24,7 @@ htmlcov/
 model/
 models/
 model_store/
-artifacts/
+/artifacts/
 hf_cache/
 .cache/
 *.safetensors
