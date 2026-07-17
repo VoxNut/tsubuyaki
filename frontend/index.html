@@ -5,9 +5,9 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <meta name="theme-color" content="#191724">
     <title>tsubuyaki</title>
-    <link rel="icon" type="image/png" href="regular-icon.png">
-    <link rel="apple-touch-icon" href="regular-icon.png">
-    <link rel="manifest" href="manifest.json">
+    <link rel="icon" type="image/png" href="regular-icon.png?v=3">
+    <link rel="apple-touch-icon" href="regular-icon.png?v=3">
+    <link rel="manifest" href="manifest.json?v=3">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <style>
@@ -136,9 +136,12 @@
         .status-pill.ready .status-dot { background: var(--rp-foam); box-shadow: 0 0 0 3px color-mix(in srgb, var(--rp-foam) 18%, transparent); }
         .status-pill.error .status-dot { background: var(--rp-love); box-shadow: 0 0 0 3px color-mix(in srgb, var(--rp-love) 18%, transparent); }
         .compact-btn { min-height: 34px; padding: 6px 11px; }
-        .toggle-btn[aria-pressed="true"] { color: var(--rp-base); background: var(--rp-foam); border-color: transparent; font-weight: 700; }
+        .furigana-mode-switch { display: inline-flex; align-items: center; gap: 2px; padding: 3px; border: 1px solid var(--rp-overlay); border-radius: 9px; background: var(--rp-surface); }
+        .furigana-mode-option { min-height: 28px; padding: 4px 9px; border: 0; border-radius: 6px; background: transparent; color: var(--rp-subtle); font: inherit; font-size: 0.76rem; font-weight: 650; cursor: pointer; white-space: nowrap; transition: color 0.16s ease, background 0.16s ease, box-shadow 0.16s ease; }
+        .furigana-mode-option:hover { color: var(--rp-text); background: color-mix(in srgb, var(--rp-overlay) 70%, transparent); }
+        .furigana-mode-option[aria-pressed="true"] { color: var(--rp-base); background: var(--rp-foam); box-shadow: 0 3px 10px color-mix(in srgb, var(--rp-foam) 18%, transparent); }
+        .furigana-mode-option:focus-visible { outline: 2px solid var(--rp-iris); outline-offset: 2px; }
         .ruby-size-control { display: inline-flex; align-items: center; gap: 7px; }
-        #opt-ruby-size { width: 86px; height: 18px; accent-color: var(--rp-iris); }
         #ruby-size-value { min-width: 38px; color: var(--rp-text); font-size: 0.78rem; font-variant-numeric: tabular-nums; }
         #gen-progress-row { padding: 0 16px 10px; background: var(--rp-surface); border-bottom: 1px solid var(--rp-overlay); }
 
@@ -151,7 +154,12 @@
         .media-error { position: absolute; inset: 0; display: flex; align-items: center; justify-content: center; padding: 24px; text-align: center; color: var(--rp-love); background: rgba(25, 23, 36, 0.92); line-height: 1.5; }
         
         /* Subtitles List */
-        #sub-list { flex: 1 1 auto; min-height: 0; overflow-x: hidden; overflow-y: auto; padding: 22vh 0; margin: 0; list-style: none; scroll-behavior: auto; background: var(--rp-base); position: relative; }
+        #sub-list { flex: 1 1 auto; min-height: 0; overflow-x: hidden; overflow-y: auto; padding: 22vh 0; margin: 0; list-style: none; scroll-behavior: auto; scrollbar-gutter: stable; scrollbar-width: thin; scrollbar-color: var(--rp-iris) var(--rp-surface); background: var(--rp-base); position: relative; }
+        #sub-list::-webkit-scrollbar { width: 11px; }
+        #sub-list::-webkit-scrollbar-track { background: var(--rp-surface); border-left: 1px solid var(--rp-overlay); }
+        #sub-list::-webkit-scrollbar-thumb { min-height: 48px; border: 2px solid var(--rp-surface); border-radius: 999px; background: var(--rp-iris); }
+        #sub-list::-webkit-scrollbar-thumb:hover { background: var(--rp-rose); }
+        #sub-list::-webkit-scrollbar-corner { background: var(--rp-surface); }
         #player-content.has-video #sub-list { padding: 8vh 0; }
         #sub-list li { 
             /* Grid Layout for stability: Star | Text */
@@ -244,6 +252,22 @@
         input[type=range]::-webkit-slider-runnable-track { width: 100%; height: 4px; background: transparent; }
         input[type=range]::-moz-range-thumb { height: 16px; width: 16px; border-radius: 50%; background: var(--rp-text); border: none; box-shadow: 0 1px 3px rgba(0,0,0,0.5); }
         input[type=range]::-moz-range-track { width: 100%; height: 4px; background: transparent; }
+
+        #opt-ruby-size {
+            --slider-progress: 40%;
+            width: 106px;
+            height: 6px;
+            border: 1px solid color-mix(in srgb, var(--rp-muted) 55%, transparent);
+            border-radius: 999px;
+            background: linear-gradient(to right, var(--rp-iris) 0 var(--slider-progress), var(--rp-overlay) var(--slider-progress) 100%);
+            box-shadow: inset 0 1px 2px rgba(10, 8, 18, 0.52), 0 0 0 1px rgba(224, 222, 244, 0.04);
+        }
+        #opt-ruby-size::-webkit-slider-runnable-track { height: 6px; border-radius: 999px; background: transparent; }
+        #opt-ruby-size::-webkit-slider-thumb { width: 18px; height: 18px; margin-top: -6px; border: 3px solid var(--rp-iris); background: var(--rp-text); box-shadow: 0 0 0 2px var(--rp-base), 0 3px 10px rgba(10, 8, 18, 0.65); }
+        #opt-ruby-size::-moz-range-track { height: 6px; border-radius: 999px; background: var(--rp-overlay); }
+        #opt-ruby-size::-moz-range-progress { height: 6px; border-radius: 999px; background: var(--rp-iris); }
+        #opt-ruby-size::-moz-range-thumb { width: 14px; height: 14px; border: 3px solid var(--rp-iris); background: var(--rp-text); box-shadow: 0 0 0 2px var(--rp-base), 0 3px 10px rgba(10, 8, 18, 0.65); }
+        #opt-ruby-size:focus-visible { outline: 2px solid var(--rp-foam); outline-offset: 5px; }
     
         .buttons-row { display: flex; justify-content: center; gap: 18px; align-items: center; }
         .round-btn { width: 42px; height: 42px; border-radius: 50%; border: 1px solid var(--border); background: var(--rp-overlay); color: var(--rp-text); font-size: 1rem; cursor: pointer; display: flex; align-items: center; justify-content: center; transition: all 0.1s; box-shadow: 0 2px 5px rgba(0,0,0,0.2); }
@@ -283,7 +307,11 @@
             .header-action, .icon-btn { min-width: 34px; width: 34px; padding: 0; }
             #furigana-toolbar { gap: 8px; }
             .toolbar-label.reading-size-label { display: none; }
+            .toolbar-group.display-options > .toolbar-label:first-child { display: none; }
             .toolbar-group.display-options { padding: 4px 7px; gap: 6px; }
+            .furigana-mode-option { min-height: 26px; padding: 3px 7px; font-size: 0.7rem; }
+            #opt-ruby-size { width: 68px; }
+            #ruby-size-value { min-width: 34px; }
             .toolbar-group.export-actions { gap: 5px; }
             .export-prefix { display: none; }
             .media-stage { flex-basis: 28vh; min-height: 145px; }
@@ -316,9 +344,10 @@
         rt.edited {
             color: var(--warn);
         }
-        .hide-furigana ruby rt {
-            display: none !important;
-        }
+        .furigana-hover ruby rt { visibility: hidden; opacity: 0; transition: opacity 0.14s ease, color 0.14s ease; }
+        .furigana-hover ruby:hover rt,
+        .furigana-hover ruby:focus rt,
+        .furigana-hover ruby:focus-within rt { visibility: visible; opacity: 1; }
         .ruby-segment {
             cursor: pointer;
             border-bottom: 1px dotted transparent;
@@ -327,6 +356,10 @@
         }
         .ruby-segment:hover {
             border-bottom-color: var(--primary);
+        }
+        .ruby-segment:focus-visible { outline: 2px solid var(--rp-iris); outline-offset: 3px; border-radius: 3px; }
+        @media (hover: none) {
+            .furigana-hover ruby rt { visibility: visible; opacity: 1; }
         }
         .gen-progress-container {
             display: flex;
@@ -537,7 +570,10 @@
             </div>
             <div class="toolbar-group display-options">
                 <span class="toolbar-label">Furigana</span>
-                <button class="btn compact-btn toggle-btn" id="btn-toggle-ruby" onclick="Furigana.toggleRuby()" aria-pressed="true">Hide</button>
+                <span class="furigana-mode-switch" role="group" aria-label="Furigana display mode">
+                    <button class="furigana-mode-option" id="btn-furigana-always" onclick="Furigana.setDisplayMode('always')" aria-pressed="true">Always</button>
+                    <button class="furigana-mode-option" id="btn-furigana-hover" onclick="Furigana.setDisplayMode('hover')" aria-pressed="false">On hover</button>
+                </span>
                 <span class="toolbar-label reading-size-label">Reading size</span>
                 <span class="ruby-size-control">
                     <input type="range" id="opt-ruby-size" min="30" max="80" value="50" oninput="Furigana.applyRubySize()" title="Reading size">
@@ -937,7 +973,7 @@
             });
             Input.init();
             if ('serviceWorker' in navigator) {
-                navigator.serviceWorker.register('service-worker.js').catch(err => console.warn('SW registration failed:', err));
+                navigator.serviceWorker.register('service-worker.js?v=3').catch(err => console.warn('SW registration failed:', err));
             }
         },
         async pickFile() {
@@ -1692,7 +1728,7 @@
     };
 
     const Furigana = {
-        visible: true,
+        displayMode: 'always',
         rubySize: 50,
         apiEndpoint: window.location.origin,
         isGenerating: false,
@@ -1701,19 +1737,18 @@
         activeEditRubyEl: null,
 
         init() {
-            this.visible = localStorage.getItem('ky_furi_visible') !== "false";
+            const savedMode = localStorage.getItem('ky_furi_mode');
+            const legacyHidden = localStorage.getItem('ky_furi_visible') === "false";
+            this.displayMode = savedMode === 'hover' || (!savedMode && legacyHidden) ? 'hover' : 'always';
             this.rubySize = Math.min(80, Math.max(30, parseInt(localStorage.getItem('ky_furi_size') || "50") || 50));
             this.apiEndpoint = localStorage.getItem('ky_furi_api') || window.location.origin;
 
-            const toggleButton = document.getElementById('btn-toggle-ruby');
-            toggleButton.textContent = this.visible ? "Hide" : "Show";
-            toggleButton.setAttribute('aria-pressed', String(this.visible));
             document.getElementById('opt-ruby-size').value = this.rubySize;
             document.getElementById('ruby-size-value').textContent = `${this.rubySize}%`;
             const apiEl = document.getElementById('opt-api-endpoint');
             if (apiEl) apiEl.value = this.apiEndpoint;
 
-            this.applyRubyVisibility();
+            this.applyRubyDisplayMode();
             this.applyRubySize();
         },
 
@@ -1724,31 +1759,28 @@
             this.checkBackendStatus();
         },
 
-        toggleRuby() {
-            this.visible = !this.visible;
-            localStorage.setItem('ky_furi_visible', this.visible);
-            const toggleButton = document.getElementById('btn-toggle-ruby');
-            toggleButton.textContent = this.visible ? "Hide" : "Show";
-            toggleButton.setAttribute('aria-pressed', String(this.visible));
-            this.applyRubyVisibility();
+        setDisplayMode(mode) {
+            this.displayMode = mode === 'hover' ? 'hover' : 'always';
+            localStorage.setItem('ky_furi_mode', this.displayMode);
+            this.applyRubyDisplayMode();
         },
 
-        applyRubyVisibility() {
+        applyRubyDisplayMode() {
             const subList = document.getElementById('sub-list');
             const focusText = document.getElementById('focus-text');
-            if (this.visible) {
-                subList.classList.remove('hide-furigana');
-                focusText.classList.remove('hide-furigana');
-            } else {
-                subList.classList.add('hide-furigana');
-                focusText.classList.add('hide-furigana');
-            }
+            const hoverOnly = this.displayMode === 'hover';
+            subList.classList.toggle('furigana-hover', hoverOnly);
+            focusText.classList.toggle('furigana-hover', hoverOnly);
+            document.getElementById('btn-furigana-always').setAttribute('aria-pressed', String(!hoverOnly));
+            document.getElementById('btn-furigana-hover').setAttribute('aria-pressed', String(hoverOnly));
         },
 
         applyRubySize() {
             const input = document.getElementById('opt-ruby-size');
             this.rubySize = Math.min(80, Math.max(30, parseInt(input.value) || 50));
             input.value = this.rubySize;
+            const progress = ((this.rubySize - 30) / (80 - 30)) * 100;
+            input.style.setProperty('--slider-progress', `${progress}%`);
             localStorage.setItem('ky_furi_size', this.rubySize);
             document.documentElement.style.setProperty('--ruby-size', (this.rubySize / 100) + 'em');
             document.getElementById('ruby-size-value').textContent = `${this.rubySize}%`;
@@ -1853,6 +1885,9 @@
                 } else if (seg.type === "ruby") {
                     const ruby = document.createElement("ruby");
                     ruby.className = "ruby-segment";
+                    ruby.tabIndex = 0;
+                    ruby.setAttribute('role', 'button');
+                    ruby.setAttribute('aria-label', `${seg.base}, reading ${seg.reading}. Edit reading`);
                     const baseText = document.createTextNode(seg.base);
                     const rt = document.createElement("rt");
                     rt.textContent = seg.reading;
@@ -1864,6 +1899,13 @@
                     ruby.onclick = (e) => {
                         e.stopPropagation();
                         Furigana.openEditRuby(seg, ruby);
+                    };
+                    ruby.onkeydown = (e) => {
+                        if (e.key === 'Enter' || e.key === ' ') {
+                            e.preventDefault();
+                            e.stopPropagation();
+                            Furigana.openEditRuby(seg, ruby);
+                        }
                     };
                     container.appendChild(ruby);
                 }

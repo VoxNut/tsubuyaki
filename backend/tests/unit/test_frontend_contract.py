@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 from pathlib import Path
+import struct
 
 
 FRONTEND_DIR = Path(__file__).resolve().parents[3] / "frontend"
@@ -45,6 +46,29 @@ def test_ruby_readings_render_above_base_text() -> None:
     assert 'id="ruby-size-value"' in html
 
 
+def test_furigana_display_mode_supports_always_and_hover() -> None:
+    html = (FRONTEND_DIR / "index.html").read_text(encoding="utf-8")
+
+    assert "Furigana display mode" in html
+    assert ">Always</button>" in html
+    assert ">On hover</button>" in html
+    assert "setDisplayMode('always')" in html
+    assert "setDisplayMode('hover')" in html
+    assert ".furigana-hover ruby rt" in html
+    assert "localStorage.setItem('ky_furi_mode'" in html
+
+
+def test_reading_slider_and_subtitle_scrollbar_use_rose_pine_styling() -> None:
+    html = (FRONTEND_DIR / "index.html").read_text(encoding="utf-8")
+
+    assert "--slider-progress" in html
+    assert "#opt-ruby-size::-webkit-slider-thumb" in html
+    assert "#opt-ruby-size::-moz-range-progress" in html
+    assert "scrollbar-color: var(--rp-iris) var(--rp-surface)" in html
+    assert "#sub-list::-webkit-scrollbar-thumb" in html
+    assert "#sub-list::-webkit-scrollbar-thumb:hover" in html
+
+
 def test_user_interface_is_english_only() -> None:
     html = (FRONTEND_DIR / "index.html").read_text(encoding="utf-8")
 
@@ -62,6 +86,8 @@ def test_user_interface_is_english_only() -> None:
     for english_text in (
         "Generate furigana",
         "Backend offline",
+        "Always",
+        "On hover",
         "Reading size",
         "Remove reading",
         "Keyboard shortcuts",
@@ -75,5 +101,17 @@ def test_pwa_brand_and_cache_are_updated() -> None:
 
     assert '"name": "tsubuyaki"' in manifest
     assert '"theme_color": "#191724"' in manifest
-    assert "tsubuyaki-v2" in service_worker
+    assert "tsubuyaki-v3" in service_worker
+    assert '"src": "regular-icon.png?v=3"' in manifest
+    assert '"src": "maskable-icon.png?v=3"' in manifest
     assert "fetch(e.request)" in service_worker
+
+
+def test_tsubuyaki_icons_are_valid_512_pixel_pngs() -> None:
+    for name in ("regular-icon.png", "maskable-icon.png"):
+        icon = FRONTEND_DIR / name
+        data = icon.read_bytes()
+        assert data.startswith(b"\x89PNG\r\n\x1a\n")
+        width, height = struct.unpack(">II", data[16:24])
+        assert (width, height) == (512, 512)
+        assert len(data) > 100_000

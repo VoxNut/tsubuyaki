@@ -1,10 +1,10 @@
-const CACHE_NAME = 'tsubuyaki-v2';
+const CACHE_NAME = 'tsubuyaki-v3';
 const ASSETS = [
   './',
   './index.html',
-  './manifest.json',
-  './maskable-icon.png',
-  './regular-icon.png'
+  './manifest.json?v=3',
+  './maskable-icon.png?v=3',
+  './regular-icon.png?v=3'
 ];
 
 self.addEventListener('install', (e) => {
