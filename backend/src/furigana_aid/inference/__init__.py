@@ -32,6 +32,7 @@ from .segments import (
     tokenize_with_offsets,
     validate_segment_reconstruction,
 )
+from .ruby_alignment import RubyAlignmentPart, align_reading_to_kanji
 
 __all__ = [
     "CONTEXT_ENSEMBLE",
@@ -45,11 +46,13 @@ __all__ = [
     "HybridTuning",
     "InvalidTargetSpan",
     "MorphToken",
+    "RubyAlignmentPart",
     "SurfaceSpan",
     "TargetCenteredContext",
     "TargetExceedsTokenBudget",
     "TargetMarkerError",
     "build_furigana_segments",
+    "align_reading_to_kanji",
     "build_target_centered_context",
     "calibrated_candidate_prediction",
     "candidate_log_softmax",

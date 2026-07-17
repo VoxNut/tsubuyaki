@@ -41,9 +41,12 @@ def test_ruby_readings_render_above_base_text() -> None:
     html = (FRONTEND_DIR / "index.html").read_text(encoding="utf-8")
 
     assert "ruby-position: over" in html
+    assert "ruby-align: space-around" in html
     assert "display: ruby;" in html
     assert "display: ruby-text;" in html
     assert 'id="ruby-size-value"' in html
+    assert "splitRubySegment(segment)" in html
+    assert "normalizeSegments(segments)" in html
 
 
 def test_furigana_display_mode_supports_always_and_hover() -> None:
@@ -103,9 +106,9 @@ def test_pwa_brand_and_cache_are_updated() -> None:
 
     assert '"name": "tsubuyaki"' in manifest
     assert '"theme_color": "#191724"' in manifest
-    assert "tsubuyaki-v4" in service_worker
-    assert '"src": "regular-icon.png?v=4"' in manifest
-    assert '"src": "maskable-icon.png?v=4"' in manifest
+    assert "tsubuyaki-v5" in service_worker
+    assert '"src": "regular-icon.png?v=5"' in manifest
+    assert '"src": "maskable-icon.png?v=5"' in manifest
     assert "fetch(e.request)" in service_worker
 
 

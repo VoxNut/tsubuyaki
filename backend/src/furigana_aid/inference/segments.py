@@ -7,6 +7,7 @@ import re
 from typing import Callable, Iterable, Literal, Protocol, Sequence
 
 from .hybrid import PLAIN_TEXT, PredictionSource
+from .ruby_alignment import align_reading_to_kanji
 
 
 # Kept deliberately identical to the notebook for behavioral parity.
@@ -237,19 +238,51 @@ def build_furigana_segments(
                         prediction, "candidate_label_ids", ()
                     )
                 )
-                _append_segment(
-                    output,
-                    FuriganaSegment(
-                        kind="ruby",
-                        text=span.surface,
-                        start=span.start,
-                        end=span.end,
-                        reading=str(reading),
-                        source=source,
-                        confidence=prediction.confidence,
-                        candidate_label_ids=candidate_ids,
-                    ),
+                aligned_parts = align_reading_to_kanji(
+                    span.surface,
+                    str(reading),
                 )
+                if aligned_parts is None:
+                    aligned_parts = ()
+
+                part_cursor = span.start
+                for part in aligned_parts:
+                    part_end = part_cursor + len(part.text)
+                    _append_segment(
+                        output,
+                        FuriganaSegment(
+                            kind=part.kind,
+                            text=part.text,
+                            start=part_cursor,
+                            end=part_end,
+                            reading=part.reading,
+                            source=(source if part.kind == "ruby" else None),
+                            confidence=(
+                                prediction.confidence
+                                if part.kind == "ruby"
+                                else None
+                            ),
+                            candidate_label_ids=(
+                                candidate_ids if part.kind == "ruby" else ()
+                            ),
+                        ),
+                    )
+                    part_cursor = part_end
+
+                if not aligned_parts:
+                    _append_segment(
+                        output,
+                        FuriganaSegment(
+                            kind="ruby",
+                            text=span.surface,
+                            start=span.start,
+                            end=span.end,
+                            reading=str(reading),
+                            source=source,
+                            confidence=prediction.confidence,
+                            candidate_label_ids=candidate_ids,
+                        ),
+                    )
             else:
                 _append_segment(
                     output,

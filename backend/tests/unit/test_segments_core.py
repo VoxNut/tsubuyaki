@@ -130,3 +130,30 @@ def test_unusable_mecab_reading_becomes_plain_text_not_fake_ruby() -> None:
     assert segments[0].source == PLAIN_TEXT
     assert segments[0].reading is None
     assert plain_text_from_segments(segments) == "未知"
+
+
+def test_okurigana_is_plain_text_with_source_offsets_preserved() -> None:
+    sentence = "合わせよう"
+    segments = build_furigana_segments(
+        sentence,
+        tagger=FakeTagger([sentence]),
+        known_surfaces={sentence},
+        predict_reading=lambda *_args: HybridDecision(
+            reading="あわせよう",
+            source=CONTEXT_ENSEMBLE,
+            confidence=0.93,
+            candidate_label_ids=(8, 13),
+        ),
+    )
+
+    assert [segment.kind for segment in segments] == ["ruby", "text"]
+    assert [(segment.text, segment.reading) for segment in segments] == [
+        ("合", "あ"),
+        ("わせよう", None),
+    ]
+    assert [(segment.start, segment.end) for segment in segments] == [
+        (0, 1),
+        (1, 5),
+    ]
+    assert segments[0].candidate_label_ids == (8, 13)
+    assert plain_text_from_segments(segments) == sentence

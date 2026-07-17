@@ -5,9 +5,9 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <meta name="theme-color" content="#191724">
     <title>tsubuyaki</title>
-    <link rel="icon" type="image/png" href="regular-icon.png?v=4">
-    <link rel="apple-touch-icon" href="regular-icon.png?v=4">
-    <link rel="manifest" href="manifest.json?v=4">
+    <link rel="icon" type="image/png" href="regular-icon.png?v=5">
+    <link rel="apple-touch-icon" href="regular-icon.png?v=5">
+    <link rel="manifest" href="manifest.json?v=5">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <style>
@@ -329,7 +329,7 @@
         }
         ruby {
             ruby-position: over;
-            ruby-align: center;
+            ruby-align: space-around;
             display: ruby;
             white-space: nowrap;
         }
@@ -991,7 +991,7 @@
             });
             Input.init();
             if ('serviceWorker' in navigator) {
-                navigator.serviceWorker.register('service-worker.js?v=4').catch(err => console.warn('SW registration failed:', err));
+                navigator.serviceWorker.register('service-worker.js?v=5').catch(err => console.warn('SW registration failed:', err));
             }
         },
         async pickFile() {
@@ -1435,15 +1435,28 @@
         load(meta, blob, seekTo = null) {
             this.meta = meta; this.subs = meta.subs || [];
             if(!this.meta.bookmarks) this.meta.bookmarks = [];
-            
+            let migratedRubySegments = false;
             this.subs.forEach(s => {
                 if (!s.segments) {
                     s.segments = [{ type: "text", text: s.text || s.plain_text }];
+                    migratedRubySegments = true;
+                }
+                const normalizedSegments = Furigana.normalizeSegments(s.segments);
+                if (
+                    normalizedSegments.length !== s.segments.length
+                    || normalizedSegments.some((segment, index) => segment !== s.segments[index])
+                ) {
+                    s.segments = normalizedSegments;
+                    migratedRubySegments = true;
                 }
                 if (s.start === undefined) s.start = s.start_ms / 1000;
                 if (s.end === undefined) s.end = s.end_ms / 1000;
                 if (s.text === undefined) s.text = s.plain_text;
             });
+            if (migratedRubySegments) {
+                this.meta.subs = this.subs;
+                DB.saveMetadata(this.meta).catch(error => console.warn("Could not persist ruby migration:", error));
+            }
             
             const fToolbar = document.getElementById('furigana-toolbar');
             if (this.subs.length > 0) {
@@ -1807,6 +1820,133 @@
             document.getElementById('ruby-size-value').textContent = `${this.rubySize}%`;
         },
 
+        isKanjiCharacter(character) {
+            return /[一-龠々〆ヶ]/.test(character);
+        },
+
+        isKanaCharacter(character) {
+            return /[ぁ-ゖゝゞァ-ヺヽヾー]/.test(character);
+        },
+
+        toHiragana(text) {
+            return Array.from(text || "").map(character => {
+                if (character >= "ァ" && character <= "ヶ") {
+                    return String.fromCharCode(character.charCodeAt(0) - 0x60);
+                }
+                return character;
+            }).join("");
+        },
+
+        surfaceRuns(surface) {
+            const runs = [];
+            Array.from(surface || "").forEach(character => {
+                const kind = this.isKanjiCharacter(character)
+                    ? "kanji"
+                    : (this.isKanaCharacter(character) ? "kana" : "other");
+                const previous = runs[runs.length - 1];
+                if (previous && previous.kind === kind) {
+                    previous.text += character;
+                } else {
+                    runs.push({ kind, text: character });
+                }
+            });
+            return runs;
+        },
+
+        splitRubySegment(segment) {
+            if (
+                !segment
+                || segment.type !== "ruby"
+                || !segment.base
+                || !segment.reading
+                || !Array.from(segment.base).some(character => this.isKanjiCharacter(character))
+            ) {
+                return [segment];
+            }
+
+            const normalizedReading = this.toHiragana(segment.reading);
+            const parts = [];
+            const pendingKanjiIndices = [];
+            let readingCursor = 0;
+
+            for (const run of this.surfaceRuns(segment.base)) {
+                if (run.kind === "kanji") {
+                    parts.push({ ...segment, base: run.text, reading: null });
+                    pendingKanjiIndices.push(parts.length - 1);
+                    continue;
+                }
+                if (run.kind === "other") {
+                    parts.push({ type: "text", text: run.text });
+                    continue;
+                }
+
+                const anchor = this.toHiragana(run.text);
+                const searchFrom = readingCursor + (pendingKanjiIndices.length > 0 ? 1 : 0);
+                const anchorStart = normalizedReading.indexOf(anchor, searchFrom);
+                if (anchorStart < 0) return [segment];
+
+                const readingBeforeAnchor = segment.reading.slice(readingCursor, anchorStart);
+                if (pendingKanjiIndices.length > 0) {
+                    if (pendingKanjiIndices.length !== 1 || !readingBeforeAnchor) return [segment];
+                    const partIndex = pendingKanjiIndices.pop();
+                    parts[partIndex] = { ...parts[partIndex], reading: readingBeforeAnchor };
+                } else if (readingBeforeAnchor) {
+                    return [segment];
+                }
+
+                parts.push({ type: "text", text: run.text });
+                readingCursor = anchorStart + anchor.length;
+            }
+
+            const remainingReading = segment.reading.slice(readingCursor);
+            if (pendingKanjiIndices.length > 0) {
+                if (pendingKanjiIndices.length !== 1 || !remainingReading) return [segment];
+                const partIndex = pendingKanjiIndices.pop();
+                parts[partIndex] = { ...parts[partIndex], reading: remainingReading };
+            } else if (remainingReading) {
+                return [segment];
+            }
+
+            if (parts.some(part => part.type === "ruby" && !part.reading)) return [segment];
+            if (
+                parts.length === 1
+                && parts[0].type === "ruby"
+                && parts[0].base === segment.base
+                && parts[0].reading === segment.reading
+            ) {
+                return [segment];
+            }
+            return parts;
+        },
+
+        normalizeSegments(segments) {
+            const normalized = [];
+            const append = (segment) => {
+                if (!segment) return;
+                if (segment.type === "ruby" && !segment.reading) {
+                    segment = { type: "text", text: segment.base || "" };
+                }
+                if (!((segment.type === "text" ? segment.text : segment.base) || "")) return;
+                const previous = normalized[normalized.length - 1];
+                if (previous?.type === "text" && segment.type === "text") {
+                    normalized[normalized.length - 1] = {
+                        type: "text",
+                        text: previous.text + segment.text
+                    };
+                } else {
+                    normalized.push(segment);
+                }
+            };
+
+            (segments || []).forEach(segment => {
+                const parts = segment.type === "ruby"
+                    ? this.splitRubySegment(segment)
+                    : [segment];
+                parts.forEach(append);
+            });
+            return normalized;
+        },
+
         async checkBackendStatus() {
             const statusEl = document.getElementById('gen-status');
             const statusText = document.getElementById('gen-status-text');
@@ -1870,7 +2010,7 @@
             if (segments.length === 0 && text) {
                 segments.push({ type: "text", text: text.replace(/<[^>]+>/g, "") });
             }
-            return segments;
+            return this.normalizeSegments(segments);
         },
 
         stripRubyMarkup(text) {
@@ -1947,7 +2087,7 @@
                     start_ms: c.start_ms,
                     end_ms: c.end_ms,
                     plain_text: c.plain_text,
-                    segments: c.segments,
+                    segments: this.normalizeSegments(c.segments),
                     start: startSec,
                     end: endSec,
                     text: c.plain_text
@@ -2023,7 +2163,7 @@
                     data.cues.forEach((rc, rIdx) => {
                         const localIdx = i + rIdx;
                         if (localIdx < cues.length) {
-                            cues[localIdx].segments = rc.segments;
+                            cues[localIdx].segments = this.normalizeSegments(rc.segments);
                         }
                     });
                     processed += chunk.length;
@@ -2103,7 +2243,7 @@
                 start_ms: s.start_ms,
                 end_ms: s.end_ms,
                 plain_text: s.plain_text,
-                segments: s.segments.map(seg => {
+                segments: this.normalizeSegments(s.segments).map(seg => {
                     if (seg.type === "text") {
                         return { type: "text", text: seg.text };
                     } else {
@@ -2145,7 +2285,7 @@
                 return `${h}:${m}:${s},${mss}`;
             };
             const rows = Player.subs.map((s, idx) => {
-                const srtText = s.segments.map(seg => {
+                const srtText = this.normalizeSegments(s.segments).map(seg => {
                     if (seg.type === "text") {
                         return seg.text;
                     } else {

@@ -16,6 +16,7 @@ from furigana_aid.inference.hybrid import (
     contextual_decision,
     non_contextual_decision,
 )
+from furigana_aid.inference.ruby_alignment import align_reading_to_kanji
 from furigana_aid.neural import (
     NeuralModels,
     build_target_centered_ids,
@@ -129,6 +130,43 @@ def _coalesce_text(segments: list[InternalSegment], text: str) -> None:
         )
     else:
         segments.append(TextSegment(type="text", text=text))
+
+
+def _append_final_segment(segments: list[Segment], segment: Segment) -> None:
+    if isinstance(segment, TextSegment):
+        if not segment.text:
+            return
+        if segments and isinstance(segments[-1], TextSegment):
+            previous = segments[-1]
+            segments[-1] = TextSegment(
+                type="text",
+                text=previous.text + segment.text,
+            )
+            return
+    segments.append(segment)
+
+
+def _expand_ruby_segment(segment: RubySegment) -> tuple[Segment, ...]:
+    aligned_parts = align_reading_to_kanji(segment.base, segment.reading)
+    if aligned_parts is None:
+        return (segment,)
+
+    expanded: list[Segment] = []
+    for part in aligned_parts:
+        if part.kind == "text":
+            expanded.append(TextSegment(type="text", text=part.text))
+        else:
+            expanded.append(
+                RubySegment(
+                    type="ruby",
+                    base=part.text,
+                    reading=part.reading or "",
+                    source=segment.source,
+                    confidence=segment.confidence,
+                    edited=segment.edited,
+                )
+            )
+    return tuple(expanded)
 
 
 class FuriganaEngine:
@@ -347,6 +385,14 @@ class FuriganaEngine:
                 for segment in segments
                 if not isinstance(segment, _PendingContextSegment)
             ]
+            expanded_segments: list[Segment] = []
+            for segment in final_segments:
+                if isinstance(segment, RubySegment):
+                    for expanded in _expand_ruby_segment(segment):
+                        _append_final_segment(expanded_segments, expanded)
+                else:
+                    _append_final_segment(expanded_segments, segment)
+            final_segments = expanded_segments
             rebuilt = "".join(
                 segment.text
                 if isinstance(segment, TextSegment)
