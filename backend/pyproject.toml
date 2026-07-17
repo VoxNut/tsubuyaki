@@ -1,0 +1,39 @@
+[build-system]
+requires = ["setuptools>=77"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "furigana-aid-backend"
+version = "0.1.0"
+description = "BERT + target-aware MLP Furigana inference service"
+readme = "../README.md"
+requires-python = ">=3.12,<3.13"
+license = { text = "GPL-3.0-only" }
+authors = [
+  { name = "Võ Minh Nhựt" },
+]
+dependencies = [
+  "fastapi==0.139.2",
+  "fugashi==1.5.2",
+  "huggingface-hub==0.36.2",
+  "numpy==2.5.1",
+  "psutil==7.2.2",
+  "pydantic-settings==2.14.2",
+  "safetensors==0.8.0",
+  "torch==2.13.0",
+  "transformers==4.57.6",
+  "unidic-lite==1.0.8",
+  "uvicorn==0.51.0",
+]
+
+[tool.setuptools]
+package-dir = { "" = "src" }
+
+[tool.setuptools.packages.find]
+where = ["src"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+pythonpath = ["src"]
+addopts = "-ra"
+asyncio_mode = "auto"

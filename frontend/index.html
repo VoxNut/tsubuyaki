@@ -1,0 +1,2379 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="theme-color" content="#191724">
+    <title>tsubuyaki</title>
+    <link rel="icon" type="image/png" href="regular-icon.png?v=6">
+    <link rel="apple-touch-icon" href="regular-icon.png?v=6">
+    <link rel="manifest" href="manifest.json?v=6">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <style>
+        :root {
+            /* Rosé Pine: https://github.com/rose-pine/rose-pine-palette */
+            --rp-base: #191724;
+            --rp-surface: #1f1d2e;
+            --rp-overlay: #26233a;
+            --rp-muted: #6e6a86;
+            --rp-subtle: #908caa;
+            --rp-text: #e0def4;
+            --rp-love: #eb6f92;
+            --rp-gold: #f6c177;
+            --rp-rose: #ebbcba;
+            --rp-pine: #31748f;
+            --rp-foam: #9ccfd8;
+            --rp-iris: #c4a7e7;
+            --bg: var(--rp-base);
+            --surface: var(--rp-surface);
+            --primary: var(--rp-iris);
+            --text: var(--rp-subtle);
+            --text-active: var(--rp-text);
+            --sec: var(--rp-foam);
+            --warn: var(--rp-gold);
+            --font-ui: system-ui, -apple-system, sans-serif;
+            --font-reader: system-ui, -apple-system, sans-serif;
+            --font-size-base: 36px;
+            --active-weight: normal;
+            --active-scale: 1.05;
+            --focus-width: 90%;
+            --border: color-mix(in srgb, var(--rp-muted) 35%, transparent);
+            --shadow: 0 18px 50px rgba(10, 8, 18, 0.34);
+        }
+        * { box-sizing: border-box; }
+        body, button, header, .modal, .drop-zone, input[type=range] { 
+            user-select: none; -webkit-user-select: none; 
+        }
+        
+        body { margin: 0; background: var(--bg); color: var(--text); font-family: var(--font-ui); height: 100vh; height: 100dvh; overflow: hidden; display: flex; flex-direction: column; }
+        
+        /* --- UTILS --- */
+        .hidden { display: none !important; }
+        .svg-sprite { position: absolute; width: 0; height: 0; overflow: hidden; pointer-events: none; }
+        .app-icon {
+            width: 1.15rem;
+            height: 1.15rem;
+            display: block;
+            flex: 0 0 auto;
+            fill: none;
+            stroke: currentColor;
+            stroke-width: 1.8;
+            stroke-linecap: round;
+            stroke-linejoin: round;
+        }
+        .btn { min-height: 38px; background: var(--rp-overlay); color: var(--rp-text); border: 1px solid var(--border); padding: 8px 14px; border-radius: 10px; cursor: pointer; font-size: 0.88rem; transition: background 0.2s, border-color 0.2s, transform 0.1s; font-family: var(--font-ui); }
+        .btn:hover { background: var(--rp-surface); border-color: var(--rp-iris); }
+        .btn:active { background: var(--rp-surface); transform: scale(0.98); }
+        .btn-primary { background: var(--primary); color: var(--rp-base); font-weight: bold; border: none; }
+        .btn-primary:hover { background: var(--rp-rose); }
+        .icon-btn { min-width: 38px; height: 38px; display: inline-grid; place-items: center; background: transparent; border: 1px solid transparent; border-radius: 10px; color: var(--rp-subtle); font-size: 1.1rem; cursor: pointer; padding: 0; margin: 0; }
+        .icon-btn:hover { color: var(--rp-text); background: var(--rp-overlay); border-color: var(--border); }
+        .icon-btn .app-icon { width: 1.1rem; height: 1.1rem; }
+        .del-btn { color: var(--rp-muted); font-size: 1.2rem; padding: 0 15px; cursor: pointer; background: transparent; border:none; height: 100%; display: flex; align-items: center; }
+        .del-btn:hover { color: var(--rp-love); }
+        .del-btn .app-icon, .bm-del-btn .app-icon { width: 1.05rem; height: 1.05rem; }
+        
+        /* --- MODALS --- */
+        .modal-overlay { position: fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.8); z-index: 200; display:flex; justify-content:center; align-items:center; backdrop-filter: blur(2px); }
+        .modal { background: var(--rp-surface); padding: 25px; border-radius: 14px; width: 90%; max-width: 500px; border: 1px solid var(--rp-overlay); box-shadow: 0 18px 45px rgba(0,0,0,0.45); max-height: 85vh; display: flex; flex-direction: column; }
+        .setting-row { margin-bottom: 20px; display:flex; justify-content: space-between; align-items: center; }
+        .setting-row label { color: var(--rp-text); font-size: 0.9rem; flex: 1; }
+        .setting-input-group { flex: 1; display:flex; justify-content: flex-end; align-items: center; gap: 10px; }
+        select, input[type=number], input[type=text] { padding: 8px; background: var(--rp-base); border: 1px solid var(--rp-overlay); color: var(--rp-text); border-radius: 6px; max-width: 100%; }
+        
+        #loading-overlay { z-index: 300; flex-direction: column; }
+        .spinner { width: 50px; height: 50px; border: 5px solid var(--rp-overlay); border-top: 5px solid var(--primary); border-radius: 50%; animation: spin 1s linear infinite; margin-bottom: 20px; }
+        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+    
+        .key-table { width: 100%; border-collapse: collapse; font-size: 0.9rem; }
+        .key-table td { padding: 8px 0; border-bottom: 1px solid var(--rp-overlay); }
+        .key-table td:first-child { color: var(--primary); font-weight: bold; }
+        .key-table td:last-child { text-align: right; color: var(--rp-subtle); }
+        
+        /* Bookmarks Modal */
+        .bm-filter-row { margin-bottom: 15px; border-bottom: 1px solid var(--rp-overlay); padding-bottom: 15px; }
+        #bm-list { overflow-y: auto; margin: 0; flex: 1; min-height: 200px; }
+        .bm-item { padding: 12px; border-bottom: 1px solid #252525; cursor: pointer; display: grid; grid-template-columns: 1fr auto; gap: 10px; align-items: start; }
+        .bm-item:hover { background: #252525; }
+        .bm-content { display: flex; flex-direction: column; gap: 5px; overflow: hidden; }
+        .bm-text { color: var(--rp-text); font-size: 0.95rem; line-height: 1.4; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
+        .bm-meta { font-size: 0.75rem; color: var(--rp-muted); display: flex; justify-content: space-between; gap: 10px; }
+        .bm-book-title { color: var(--primary); font-weight: bold; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 150px; }
+        .bm-del-btn { color: var(--rp-muted); background: transparent; border: none; font-size: 1.2rem; cursor: pointer; padding: 5px 10px; }
+        .bm-del-btn:hover { color: var(--rp-love); background: var(--rp-overlay); border-radius: 4px; }
+
+        /* --- VIEW: LIBRARY --- */
+        #view-library { flex: 1; padding: 20px; overflow-y: auto; display: flex; flex-direction: column; align-items: center; max-width: 800px; margin: 0 auto; width: 100%; }
+        
+        .drop-zone { width: 100%; min-height: 112px; border: 2px dashed var(--rp-muted); border-radius: 16px; display: flex; flex-direction: row; gap: 15px; justify-content: center; align-items: center; background: var(--rp-surface); margin-bottom: 20px; transition: border-color 0.2s, background 0.2s, transform 0.2s; cursor: pointer; flex-shrink: 0; }
+        .drop-zone:hover { border-color: var(--rp-iris); background: var(--rp-overlay); transform: translateY(-1px); }
+        .drop-zone.dragover { border-color: var(--rp-foam); background: var(--rp-overlay); }
+        .drop-zone-icon { width: 2.35rem; height: 2.35rem; color: var(--rp-rose); stroke-width: 1.55; filter: drop-shadow(0 5px 12px color-mix(in srgb, var(--rp-rose) 22%, transparent)); }
+        
+        #library-list { width: 100%; display: flex; flex-direction: column; gap: 10px; }
+
+        .lib-item { display: flex; justify-content: space-between; align-items: center; padding: 10px; border-radius: 12px; background: var(--rp-surface); border: 1px solid var(--rp-overlay); cursor: pointer; transition: transform 0.1s, background 0.2s, border-color 0.2s; height: 80px; overflow: hidden; }
+        .lib-item:hover { background: var(--rp-overlay); border-color: var(--rp-muted); }
+        .lib-item:active { transform: scale(0.99); }
+        .lib-item.active-book { border: 2px solid var(--primary); background: var(--rp-overlay); }
+        .lib-cover { width: 60px; height: 60px; background: var(--rp-base); border-radius: 8px; object-fit: cover; margin-right: 15px; flex-shrink: 0; display: flex; align-items: center; justify-content: center; font-size: 1.5rem; color: var(--rp-muted); }
+        .lib-cover .app-icon { width: 1.7rem; height: 1.7rem; color: var(--rp-iris); stroke-width: 1.55; }
+        .lib-info { flex: 1; min-width: 0; display: flex; flex-direction: column; justify-content: center; }
+        .lib-title { font-weight: bold; font-size: 1rem; margin-bottom: 5px; color: var(--rp-text); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+        .lib-meta { color:var(--rp-subtle); font-size:0.75rem; display: flex; align-items: center; gap: 6px; }
+        .progress-bar-mini { height: 4px; background: var(--rp-base); width: 100%; margin-top: 8px; border-radius: 2px; }
+        .progress-fill-mini { height: 100%; background: var(--sec); width: 0%; border-radius: 2px; }
+        .badge { background: var(--rp-base); color: var(--rp-subtle); padding: 2px 5px; border-radius: 4px; font-size: 0.65rem; border: 1px solid var(--rp-muted); text-transform: uppercase; letter-spacing: 0.5px; }
+        .badge.cached { border-color: var(--sec); color: var(--sec); }
+        .badge.linked { border-color: var(--rp-pine); color: var(--rp-foam); }
+        .badge.playing { border-color: var(--primary); color: var(--primary); font-weight: bold; }
+        .version-footer { margin-top: auto; padding-top: 20px; color: var(--rp-muted); font-size: 0.8rem; font-family: monospace; }
+
+        /* --- VIEW: PLAYER --- */
+        #view-player { flex: 1; display: flex; flex-direction: column; height: 100%; overflow: hidden; position: relative; }
+        
+        .app-header { height: 64px; padding: 0 16px; background: color-mix(in srgb, var(--rp-surface) 94%, transparent); display: grid; grid-template-columns: minmax(190px, 1fr) minmax(0, 2fr) minmax(280px, 1fr); align-items: center; gap: 14px; border-bottom: 1px solid var(--rp-overlay); z-index: 50; flex-shrink: 0; position: relative; backdrop-filter: blur(14px); }
+        .header-left, .header-actions { display: flex; align-items: center; gap: 8px; min-width: 0; }
+        .header-actions { justify-content: flex-end; }
+        .brand-mark { color: var(--rp-iris); font-weight: 700; letter-spacing: 0.08em; font-size: 0.82rem; white-space: nowrap; }
+        #player-title-container { min-width: 0; display: flex; justify-content: center; align-items: center; }
+        #player-title { font-weight: 650; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 100%; font-size: 0.9rem; color: var(--rp-subtle); }
+        .header-action { display: inline-flex; align-items: center; gap: 7px; }
+        .header-icon { width: 1.05rem; height: 1.05rem; color: var(--rp-iris); }
+
+        #furigana-toolbar { min-height: 66px; padding: 10px 16px; background: var(--rp-surface); border-bottom: 1px solid var(--rp-overlay); display: grid; grid-template-columns: minmax(250px, 1fr) auto minmax(220px, 1fr); align-items: center; gap: 14px; z-index: 40; position: relative; }
+        .toolbar-group { min-width: 0; display: flex; align-items: center; gap: 9px; }
+        .toolbar-group.display-options { justify-content: center; padding: 5px 10px; border: 1px solid var(--border); border-radius: 12px; background: var(--rp-base); }
+        .toolbar-group.export-actions { justify-content: flex-end; }
+        .toolbar-label { color: var(--rp-subtle); font-size: 0.78rem; font-weight: 650; letter-spacing: 0.03em; white-space: nowrap; }
+        .status-pill { display: inline-flex; align-items: center; gap: 7px; min-height: 30px; padding: 5px 9px; border-radius: 999px; background: var(--rp-base); color: var(--rp-subtle); border: 1px solid var(--border); font-size: 0.76rem; white-space: nowrap; }
+        .status-dot { width: 7px; height: 7px; border-radius: 50%; background: var(--rp-muted); box-shadow: 0 0 0 3px color-mix(in srgb, var(--rp-muted) 18%, transparent); }
+        .status-pill.ready .status-dot { background: var(--rp-foam); box-shadow: 0 0 0 3px color-mix(in srgb, var(--rp-foam) 18%, transparent); }
+        .status-pill.error .status-dot { background: var(--rp-love); box-shadow: 0 0 0 3px color-mix(in srgb, var(--rp-love) 18%, transparent); }
+        .compact-btn { min-height: 34px; padding: 6px 11px; }
+        .furigana-mode-switch { display: inline-flex; align-items: center; gap: 2px; padding: 3px; border: 1px solid var(--rp-overlay); border-radius: 9px; background: var(--rp-surface); }
+        .furigana-mode-option { min-height: 28px; padding: 4px 9px; border: 0; border-radius: 6px; background: transparent; color: var(--rp-subtle); font: inherit; font-size: 0.76rem; font-weight: 650; cursor: pointer; white-space: nowrap; transition: color 0.16s ease, background 0.16s ease, box-shadow 0.16s ease; }
+        .furigana-mode-option:hover { color: var(--rp-text); background: color-mix(in srgb, var(--rp-overlay) 70%, transparent); }
+        .furigana-mode-option[aria-pressed="true"] { color: var(--rp-base); background: var(--rp-foam); box-shadow: 0 3px 10px color-mix(in srgb, var(--rp-foam) 18%, transparent); }
+        .furigana-mode-option:focus-visible { outline: 2px solid var(--rp-iris); outline-offset: 2px; }
+        .ruby-size-control { display: inline-flex; align-items: center; gap: 7px; }
+        #ruby-size-value { min-width: 38px; color: var(--rp-text); font-size: 0.78rem; font-variant-numeric: tabular-nums; }
+        #gen-progress-row { padding: 0 16px 10px; background: var(--rp-surface); border-bottom: 1px solid var(--rp-overlay); }
+
+        #controls { height: 112px; background: var(--surface); padding: 11px 20px 12px; display: flex; flex-direction: column; justify-content: center; gap: 9px; border-top: 1px solid var(--rp-overlay); z-index: 50; flex-shrink: 0; box-shadow: 0 -12px 32px rgba(10, 8, 18, 0.18); }
+    
+        #player-content { flex: 1; min-height: 0; display: flex; flex-direction: column; overflow: hidden; position: relative; z-index: 10; background: var(--rp-base); }
+
+        .media-stage { position: relative; flex: 0 0 clamp(190px, 38vh, 460px); min-height: 0; display: flex; align-items: center; justify-content: center; background: #08070d; border-bottom: 1px solid var(--rp-overlay); overflow: hidden; }
+        .media-stage video { width: 100%; height: 100%; object-fit: contain; background: #000; }
+        .media-error { position: absolute; inset: 0; display: flex; align-items: center; justify-content: center; padding: 24px; text-align: center; color: var(--rp-love); background: rgba(25, 23, 36, 0.92); line-height: 1.5; }
+        
+        /* Subtitles List */
+        #sub-list { flex: 1 1 auto; min-height: 0; overflow-x: hidden; overflow-y: auto; padding: 22vh 0; margin: 0; list-style: none; scroll-behavior: auto; scrollbar-gutter: stable; scrollbar-width: thin; scrollbar-color: var(--rp-iris) var(--rp-surface); background: var(--rp-base); position: relative; }
+        #sub-list::-webkit-scrollbar { width: 11px; }
+        #sub-list::-webkit-scrollbar-track { background: var(--rp-surface); border-left: 1px solid var(--rp-overlay); }
+        #sub-list::-webkit-scrollbar-thumb { min-height: 48px; border: 2px solid var(--rp-surface); border-radius: 999px; background: var(--rp-iris); }
+        #sub-list::-webkit-scrollbar-thumb:hover { background: var(--rp-rose); }
+        #sub-list::-webkit-scrollbar-corner { background: var(--rp-surface); }
+        #player-content.has-video #sub-list { padding: 8vh 0; }
+        #sub-list li { 
+            /* Grid Layout for stability: Star | Text */
+            display: grid; 
+            grid-template-columns: 42px 1fr 42px;
+            align-items: center;
+            min-height: 1.5em;
+            padding: 16px 18px;
+            margin: 6px auto;
+            width: min(94%, 1180px);
+            color: var(--rp-muted);
+            cursor: pointer; 
+            font-size: var(--font-size-base); 
+            font-family: var(--font-reader); 
+            line-height: 1.65;
+            border: 1px solid transparent;
+            border-radius: 14px;
+            transition: background 0.18s ease, border-color 0.18s ease, color 0.18s ease;
+            user-select: text; -webkit-user-select: text;
+        }
+        
+        #sub-list li .text-container {
+            min-width: 0;
+            max-width: 100%;
+            text-align: center;
+            text-wrap: balance;
+            overflow-wrap: anywhere;
+            transition: color 0.1s, transform 0.2s cubic-bezier(0.2, 0.8, 0.2, 1); 
+            transform-origin: center center;
+        }
+
+        #sub-list li:hover { color: var(--rp-subtle); background: color-mix(in srgb, var(--rp-overlay) 44%, transparent); }
+        
+        /* Active State: Scale only the text container */
+        #sub-list li.active { background: color-mix(in srgb, var(--rp-overlay) 72%, transparent); border-color: color-mix(in srgb, var(--rp-iris) 30%, transparent); }
+        #sub-list li.active .text-container {
+            color: var(--text-active);
+            font-weight: var(--active-weight);
+            transform: scale(min(var(--active-scale), 1.04));
+            text-shadow: 0 0 24px rgba(196,167,231,0.12);
+        }
+        
+        /* Bookmark Star */
+        .star-col {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100%;
+        }
+        #sub-list li::after { content: ""; width: 42px; }
+        .star-btn { 
+            color: var(--rp-muted);
+            cursor: pointer; 
+            padding: 5px; 
+            opacity: 0.5;
+            transition: color 0.2s, opacity 0.2s;
+            user-select: none;
+        }
+        .star-btn .app-icon { width: 1.35rem; height: 1.35rem; fill: transparent; transition: fill 0.2s ease; }
+        #sub-list li:hover .star-btn { color: var(--rp-subtle); opacity: 1; }
+        .star-btn:hover { color: var(--warn) !important; opacity: 1 !important; transform: scale(1.1); }
+        .star-btn.filled { opacity: 1; color: var(--warn); }
+        .star-btn.filled .app-icon { fill: currentColor; }
+        
+        /* Empty State SRT Upload */
+        .srt-empty-container { display: flex; flex-direction: column; justify-content: center; align-items: center; height: 100%; width: 100%; padding: 40px; box-sizing: border-box; }
+        .srt-empty { width: 100%; height: 100%; max-width: 600px; max-height: 300px; border: 3px dashed var(--rp-muted); border-radius: 14px; display: flex; flex-direction: column; justify-content: center; align-items: center; color: var(--rp-subtle); cursor: pointer; transition: all 0.2s; background: var(--rp-surface); }
+        .srt-empty:hover { border-color: var(--primary); color: var(--rp-text); background: var(--rp-overlay); transform: scale(1.01); }
+        .srt-empty-icon { margin-bottom: 15px; opacity: 0.62; color: var(--rp-iris); }
+        .srt-empty-icon .app-icon { width: 3rem; height: 3rem; stroke-width: 1.35; }
+    
+        /* Chapters Sidebar */
+        #chapter-list { position: absolute; top: 64px; bottom: 112px; right: 0; width: 320px; background: var(--rp-surface); border-left: 1px solid var(--rp-overlay); overflow-y: auto; display: none; z-index: 60; box-shadow: -5px 0 15px rgba(0,0,0,0.5); }
+        #chapter-list.open { display: block; }
+        .chap-item { padding: 6px 12px; border-bottom: 1px solid var(--rp-overlay); font-size: 0.85rem; cursor: pointer; color: var(--rp-subtle); transition: background 0.2s; display: flex; align-items: center; }
+        .chap-item:hover { background: var(--rp-overlay); color: var(--rp-text); }
+        .chap-item.active-chap { background: var(--primary); color: var(--rp-base); border-left: none; font-weight: bold; }
+        .chap-item.active-chap .chap-time { color: var(--rp-surface); }
+        .chap-time { font-size: 0.75rem; color: var(--rp-muted); margin-right: 10px; font-family: monospace; min-width: 45px; text-align: right; }
+        .chap-title { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+    
+        /* Custom Seek Bar */
+        .timeline-container { display: flex; align-items: center; gap: 13px; color: var(--rp-subtle); font-family: monospace; font-size: 0.82rem; }
+        .seek-wrapper { flex: 1; position: relative; height: 16px; display: flex; align-items: center; }
+        .seek-bg { position: absolute; left: 0; width: 100%; height: 4px; background: var(--rp-overlay); border-radius: 2px; z-index: 1; }
+        .seek-fill { position: absolute; left: 0; width: 0%; height: 4px; background: var(--primary); border-radius: 2px; z-index: 2; pointer-events: none; }
+        #seek-markers { position: absolute; top: 0; left: 0; width: 100%; height: 100%; pointer-events: none; z-index: 3; }
+        .chap-marker { position: absolute; width: 2px; height: 6px; background: rgba(255,255,255,0.4); top: 5px; transform: translateX(-50%); }
+    
+        input[type=range] { width: 100%; cursor: pointer; height: 16px; background: transparent; -webkit-appearance: none; position: relative; z-index: 4; margin: 0; }
+        input[type=range]::-webkit-slider-thumb { -webkit-appearance: none; height: 16px; width: 16px; border-radius: 50%; background: var(--rp-text); margin-top: -6px; box-shadow: 0 1px 3px rgba(0,0,0,0.5); }
+        input[type=range]::-webkit-slider-runnable-track { width: 100%; height: 4px; background: transparent; }
+        input[type=range]::-moz-range-thumb { height: 16px; width: 16px; border-radius: 50%; background: var(--rp-text); border: none; box-shadow: 0 1px 3px rgba(0,0,0,0.5); }
+        input[type=range]::-moz-range-track { width: 100%; height: 4px; background: transparent; }
+
+        #opt-ruby-size {
+            --slider-progress: 40%;
+            width: 106px;
+            height: 6px;
+            border: 1px solid color-mix(in srgb, var(--rp-muted) 55%, transparent);
+            border-radius: 999px;
+            background: linear-gradient(to right, var(--rp-iris) 0 var(--slider-progress), var(--rp-overlay) var(--slider-progress) 100%);
+            box-shadow: inset 0 1px 2px rgba(10, 8, 18, 0.52), 0 0 0 1px rgba(224, 222, 244, 0.04);
+        }
+        #opt-ruby-size::-webkit-slider-runnable-track { height: 6px; border-radius: 999px; background: transparent; }
+        #opt-ruby-size::-webkit-slider-thumb { width: 18px; height: 18px; margin-top: -6px; border: 3px solid var(--rp-iris); background: var(--rp-text); box-shadow: 0 0 0 2px var(--rp-base), 0 3px 10px rgba(10, 8, 18, 0.65); }
+        #opt-ruby-size::-moz-range-track { height: 6px; border-radius: 999px; background: var(--rp-overlay); }
+        #opt-ruby-size::-moz-range-progress { height: 6px; border-radius: 999px; background: var(--rp-iris); }
+        #opt-ruby-size::-moz-range-thumb { width: 14px; height: 14px; border: 3px solid var(--rp-iris); background: var(--rp-text); box-shadow: 0 0 0 2px var(--rp-base), 0 3px 10px rgba(10, 8, 18, 0.65); }
+        #opt-ruby-size:focus-visible { outline: 2px solid var(--rp-foam); outline-offset: 5px; }
+    
+        .buttons-row { display: flex; justify-content: center; gap: 18px; align-items: center; }
+        .round-btn { width: 42px; height: 42px; border-radius: 50%; border: 1px solid var(--border); background: var(--rp-overlay); color: var(--rp-text); font-size: 1rem; cursor: pointer; display: flex; align-items: center; justify-content: center; transition: all 0.1s; box-shadow: 0 2px 5px rgba(0,0,0,0.2); }
+        .round-btn:hover { border-color: var(--rp-muted); }
+        .round-btn:active { transform: scale(0.95); background: var(--rp-surface); }
+        .round-btn.main { width: 56px; height: 56px; background: var(--rp-rose); color: var(--rp-base); font-size: 1.45rem; box-shadow: 0 6px 20px rgba(235,188,186,0.18); }
+        .round-btn .app-icon { width: 1.15rem; height: 1.15rem; }
+        .round-btn.main .app-icon { width: 1.55rem; height: 1.55rem; stroke-width: 2; }
+    
+        #view-focus { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: var(--rp-base); z-index: 100; display: flex; flex-direction: column; justify-content: center; align-items: center; padding: 40px; text-align: center; }
+        #focus-text { 
+            font-family: var(--font-reader); 
+            font-size: calc(var(--font-size-base) * 1.5); 
+            font-weight: var(--active-weight); 
+            color: var(--rp-text);
+            line-height: 1.4; 
+            max-width: var(--focus-width); 
+            width: 100%;
+            user-select: text; -webkit-user-select: text; 
+            text-wrap: balance; 
+        }
+        #focus-hint { position: absolute; bottom: 20px; color: var(--rp-muted); font-size: 0.8rem; font-family: sans-serif; opacity: 0; transition: opacity 0.5s; user-select: none; }
+        #view-focus:hover #focus-hint { opacity: 1; }
+    
+        @media (max-width: 900px) {
+            .app-header { grid-template-columns: auto minmax(0, 1fr) auto; padding: 0 10px; }
+            .brand-mark, .header-label { display: none; }
+            #furigana-toolbar { grid-template-columns: 1fr auto; min-height: 0; padding: 8px 10px; }
+            .toolbar-group.primary-action { grid-column: 1 / -1; }
+            .toolbar-group.display-options { justify-content: flex-start; }
+            .toolbar-group.export-actions { justify-content: flex-end; }
+        }
+
+        @media (max-width: 600px) {
+            #chapter-list { width: 85%; }
+            .app-header { height: 56px; }
+            #player-title { font-size: 0.78rem; }
+            .header-actions { gap: 4px; }
+            .header-action, .icon-btn { min-width: 34px; width: 34px; padding: 0; }
+            #furigana-toolbar { gap: 8px; }
+            .toolbar-label.reading-size-label { display: none; }
+            .toolbar-group.display-options > .toolbar-label:first-child { display: none; }
+            .toolbar-group.display-options { padding: 4px 7px; gap: 6px; }
+            .furigana-mode-option { min-height: 26px; padding: 3px 7px; font-size: 0.7rem; }
+            #opt-ruby-size { width: 68px; }
+            #ruby-size-value { min-width: 34px; }
+            .toolbar-group.export-actions { gap: 5px; }
+            .export-prefix { display: none; }
+            .media-stage { flex-basis: 28vh; min-height: 145px; }
+            #sub-list li { width: 96%; grid-template-columns: 30px minmax(0, 1fr) 30px; padding: 12px 8px; line-height: 1.75; font-size: min(var(--font-size-base), 8vw); }
+            #sub-list li::after { width: 30px; }
+            .star-btn .app-icon { width: 1.05rem; height: 1.05rem; }
+            #controls { height: 104px; padding: 9px 12px; }
+            #sub-list li.active { transform: none; /* Mobile scale handling override if needed */ }
+            #sub-list li.active .text-container { transform: none; }
+        }
+
+        /* --- FURIGANA AID READER --- */
+        :root {
+            --ruby-size: 0.5em;
+        }
+        ruby {
+            ruby-position: over;
+            ruby-align: space-around;
+            display: ruby;
+            white-space: nowrap;
+        }
+        rt {
+            font-size: var(--ruby-size);
+            color: var(--sec);
+            line-height: 1;
+            padding-bottom: 0.18em;
+            display: ruby-text;
+            text-align: center;
+        }
+        rt.edited {
+            color: var(--warn);
+        }
+        #sub-list[data-furigana-mode="always"] ruby rt,
+        #focus-text[data-furigana-mode="always"] ruby rt {
+            display: ruby-text !important;
+            visibility: visible !important;
+            opacity: 1 !important;
+        }
+        #sub-list[data-furigana-mode="hover"] ruby rt,
+        #focus-text[data-furigana-mode="hover"] ruby rt {
+            visibility: hidden !important;
+            opacity: 0 !important;
+            transition: opacity 0.14s ease, color 0.14s ease;
+        }
+        #sub-list[data-furigana-mode="hover"] ruby:hover rt,
+        #sub-list[data-furigana-mode="hover"] ruby:focus rt,
+        #sub-list[data-furigana-mode="hover"] ruby:focus-within rt,
+        #focus-text[data-furigana-mode="hover"] ruby:hover rt,
+        #focus-text[data-furigana-mode="hover"] ruby:focus rt,
+        #focus-text[data-furigana-mode="hover"] ruby:focus-within rt {
+            visibility: visible !important;
+            opacity: 1 !important;
+        }
+        .ruby-segment {
+            cursor: pointer;
+            border-bottom: 1px dotted transparent;
+            position: relative;
+            display: ruby;
+        }
+        .ruby-segment:hover {
+            border-bottom-color: var(--primary);
+        }
+        .ruby-segment:focus-visible { outline: 2px solid var(--rp-iris); outline-offset: 3px; border-radius: 3px; }
+        @media (hover: none) {
+            #sub-list[data-furigana-mode="hover"] ruby rt,
+            #focus-text[data-furigana-mode="hover"] ruby rt { visibility: visible !important; opacity: 1 !important; }
+        }
+        .gen-progress-container {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            width: 100%;
+            background: var(--rp-surface);
+            padding: 10px 15px;
+            border-radius: 8px;
+            border: 1px solid var(--rp-overlay);
+            margin-top: 10px;
+        }
+        .gen-progress-bar {
+            flex: 1;
+            height: 10px;
+            background: var(--rp-base);
+            border-radius: 5px;
+            overflow: hidden;
+            position: relative;
+        }
+        .gen-progress-fill {
+            height: 100%;
+            background: var(--primary);
+            width: 0%;
+            transition: width 0.1s ease;
+        }
+        .gen-progress-text {
+            font-size: 0.8rem;
+            color: var(--rp-subtle);
+            min-width: 50px;
+            text-align: right;
+        }
+        .popover-overlay {
+            position: fixed;
+            top: 0; left: 0; width: 100%; height: 100%;
+            z-index: 250;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            background: rgba(0,0,0,0.5);
+            backdrop-filter: blur(1px);
+        }
+        .popover {
+            background: var(--surface);
+            border: 1px solid var(--rp-overlay);
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.5);
+            width: 300px;
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+        }
+        .popover-title {
+            margin: 0;
+            font-size: 1rem;
+            color: var(--primary);
+            font-weight: bold;
+        }
+        .popover-input {
+            width: 100%;
+            padding: 8px;
+            background: var(--rp-base);
+            border: 1px solid var(--rp-muted);
+            color: var(--rp-text);
+            border-radius: 4px;
+        }
+    </style>
+    </head>
+    <body>
+
+    <svg class="svg-sprite" aria-hidden="true" focusable="false">
+        <defs>
+            <symbol id="icon-rose" viewBox="0 0 24 24">
+                <path d="M12 13.5c-3.7 0-6.5-2.2-6.5-5.1 0-2 1.4-3.6 3.4-4.2C9.5 2.3 11.5 1.4 13 2.7c2-.5 4 .6 4.6 2.5 1.7 1.1 2.1 3.5.8 5-1.3 2.1-3.5 3.3-6.4 3.3Z"/>
+                <path d="M8.3 8.2c1.4-1.7 5.1-2.1 7.4.2-1.6 2.1-5.4 2.3-7.4-.2ZM12 13.5V22M12 18c-2.1-1.5-4.2-1.2-5.6.3M12 17.5c2-1.4 4-1.2 5.4.2"/>
+            </symbol>
+            <symbol id="icon-arrow-left" viewBox="0 0 24 24"><path d="M19 12H5M12 19l-7-7 7-7"/></symbol>
+            <symbol id="icon-bookmark" viewBox="0 0 24 24"><path d="M6 4.5A2.5 2.5 0 0 1 8.5 2h7A2.5 2.5 0 0 1 18 4.5V22l-6-4-6 4Z"/></symbol>
+            <symbol id="icon-list" viewBox="0 0 24 24"><path d="M9 6h11M9 12h11M9 18h11"/><circle cx="4" cy="6" r="1"/><circle cx="4" cy="12" r="1"/><circle cx="4" cy="18" r="1"/></symbol>
+            <symbol id="icon-focus" viewBox="0 0 24 24"><path d="M8 3H5a2 2 0 0 0-2 2v3M16 3h3a2 2 0 0 1 2 2v3M21 16v3a2 2 0 0 1-2 2h-3M8 21H5a2 2 0 0 1-2-2v-3"/></symbol>
+            <symbol id="icon-sliders" viewBox="0 0 24 24"><path d="M4 6h7M15 6h5M4 12h2M10 12h10M4 18h10M18 18h2"/><circle cx="13" cy="6" r="2"/><circle cx="8" cy="12" r="2"/><circle cx="16" cy="18" r="2"/></symbol>
+            <symbol id="icon-help" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M9.8 9a2.4 2.4 0 1 1 3.8 2c-.9.6-1.6 1.1-1.6 2.3M12 17h.01"/></symbol>
+            <symbol id="icon-video" viewBox="0 0 24 24"><rect x="3" y="5" width="18" height="14" rx="3"/><path d="m10 9 5 3-5 3Z"/></symbol>
+            <symbol id="icon-headphones" viewBox="0 0 24 24"><path d="M4 14v-2a8 8 0 0 1 16 0v2M4 14a2 2 0 0 1 2-2h1v7H6a2 2 0 0 1-2-2ZM20 14a2 2 0 0 0-2-2h-1v7h1a2 2 0 0 0 2-2Z"/></symbol>
+            <symbol id="icon-file-text" viewBox="0 0 24 24"><path d="M6 2h8l4 4v16H6a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2Z"/><path d="M14 2v5h5M8 12h8M8 16h6"/></symbol>
+            <symbol id="icon-trash" viewBox="0 0 24 24"><path d="M4 7h16M9 7V4h6v3M7 7l1 14h8l1-14M10 11v6M14 11v6"/></symbol>
+            <symbol id="icon-star" viewBox="0 0 24 24"><path d="m12 2.7 2.9 5.9 6.5.9-4.7 4.6 1.1 6.5-5.8-3-5.8 3 1.1-6.5-4.7-4.6 6.5-.9Z"/></symbol>
+            <symbol id="icon-play" viewBox="0 0 24 24"><path d="m8 5 11 7-11 7Z"/></symbol>
+            <symbol id="icon-pause" viewBox="0 0 24 24"><path d="M9 5v14M15 5v14"/></symbol>
+            <symbol id="icon-skip-back" viewBox="0 0 24 24"><path d="M6 5v14M18 6l-8 6 8 6Z"/></symbol>
+            <symbol id="icon-replay" viewBox="0 0 24 24"><path d="M4 12a8 8 0 1 0 2.3-5.7L4 8.6M4 4v4.6h4.6"/></symbol>
+            <symbol id="icon-skip-forward" viewBox="0 0 24 24"><path d="M18 5v14M6 6l8 6-8 6Z"/></symbol>
+        </defs>
+    </svg>
+    
+    <input type="file" id="srt-upload" hidden accept=".srt,.json">
+    
+    <div id="loading-overlay" class="modal-overlay hidden">
+        <div class="spinner"></div>
+        <div style="color:white; font-weight:bold; letter-spacing:1px;">Processing...</div>
+    </div>
+
+    <!-- FILE REQUEST MODAL -->
+    <div id="modal-file-req" class="modal-overlay hidden">
+        <div class="modal">
+            <h2 style="margin-top:0; color: var(--primary);">Load File</h2>
+            <div style="color:var(--rp-subtle); margin-bottom: 20px; line-height:1.5;">
+                This book is not cached. Please select the following file:
+                <div style="background:var(--rp-base); padding:10px; border-radius:6px; margin-top:10px; font-family:monospace; color:var(--rp-text);" id="req-filename">...</div>
+            </div>
+            <div style="text-align: right;">
+                <button class="btn" onclick="document.getElementById('modal-file-req').classList.add('hidden')">Cancel</button>
+                <button class="btn btn-primary" onclick="App.triggerFileSelect()">Select File</button>
+            </div>
+        </div>
+    </div>
+    
+    <!-- SETTINGS -->
+    <div id="modal-settings" class="modal-overlay hidden" onclick="if(event.target===this) App.toggleModal('modal-settings')">
+        <div class="modal">
+            <h2 style="margin-top:0; color: var(--primary);">Settings</h2>
+            <div class="setting-row"><label>Font Family</label><select id="opt-font" onchange="App.applySettings()"><option value="system-ui, -apple-system, sans-serif">System Sans</option><option value="'Times New Roman', serif">Serif</option><option value="'Hiragino Mincho ProN', 'Yu Mincho', serif">Yu Mincho (JP)</option><option value="'Hiragino Kaku Gothic ProN', 'Yu Gothic', sans-serif">Yu Gothic (JP)</option><option value="'Meiryo', sans-serif">Meiryo (JP)</option><option value="'MS Gothic', monospace">MS Gothic (JP)</option></select></div>
+            <div class="setting-row"><label>Font Size (px)</label><div class="setting-input-group"><input type="number" id="opt-size" min="12" max="80" value="36" onchange="App.applySettings()" style="width:70px"></div></div>
+            <div class="setting-row"><label>Focus Max Width (%)</label><div class="setting-input-group"><input type="number" id="opt-focus-width" min="50" max="100" value="90" onchange="App.applySettings()" style="width:70px"></div></div>
+            <div class="setting-row"><label>Active Line Scale</label><div class="setting-input-group"><input type="number" id="opt-active-scale" min="1.0" max="2.0" step="0.05" value="1.05" onchange="App.applySettings()" style="width:70px"></div></div>
+            <div class="setting-row"><label>Bold Active Line</label><input type="checkbox" id="opt-bold" onchange="App.applySettings()" style="width:20px; height:20px; accent-color: var(--primary);"></div>
+            <div class="setting-row"><label>Fill Silence (Gaps)</label><input type="checkbox" id="opt-fill" checked onchange="App.applySettings()" style="width:20px; height:20px; accent-color: var(--primary);"></div>
+            <div class="setting-row"><label>API Server Endpoint</label><div class="setting-input-group"><input type="text" id="opt-api-endpoint" value="" placeholder="Same origin" onchange="Furigana.saveApiEndpoint()" style="width:160px; font-size: 0.8rem;"></div></div>
+            <div style="text-align: right; margin-top:20px;"><button class="btn btn-primary" onclick="App.toggleModal('modal-settings')">Done</button></div>
+        </div>
+    </div>
+    
+    <!-- BOOKMARKS MODAL -->
+    <div id="modal-bookmarks" class="modal-overlay hidden" onclick="if(event.target===this) App.toggleModal('modal-bookmarks')">
+        <div class="modal">
+            <h2 style="margin-top:0; color: var(--warn);">Bookmarks</h2>
+            <div class="bm-filter-row">
+                <select id="bm-filter" style="width:100%" onchange="App.renderBookmarkList()">
+                    <option value="all">All Books</option>
+                    <option value="current">Current Book</option>
+                </select>
+            </div>
+            <div id="bm-list"></div>
+            <div style="text-align: right; margin-top:10px; display:flex; justify-content:space-between;">
+                <button class="btn" onclick="App.exportBookmarks()">Export CSV</button>
+                <button class="btn btn-primary" onclick="App.toggleModal('modal-bookmarks')">Close</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- HELP -->
+    <div id="modal-help" class="modal-overlay hidden" onclick="if(event.target===this) App.toggleModal('modal-help')">
+        <div class="modal">
+            <h2 style="margin-top:0; color: var(--primary);">Controls</h2>
+            <table class="key-table">
+                <tr><td>Play / Pause</td><td>Space / W / (GP: A)</td></tr>
+                <tr><td>Prev / Next Line</td><td>A / D / (GP: Left/Right)</td></tr>
+                <tr><td>Replay Line</td><td>S / Down / (GP: Down)</td></tr>
+                <tr><td>Prev / Next Chap</td><td>Q / E / (GP: L1/R1)</td></tr>
+                <tr><td>Toggle Focus</td><td>F / (GP: Y)</td></tr>
+                <tr><td>Exit Focus</td><td>Esc / Hold Click</td></tr>
+            </table>
+            <div style="text-align: right; margin-top:20px;"><button class="btn btn-primary" onclick="App.toggleModal('modal-help')">Close</button></div>
+        </div>
+    </div>
+
+    <!-- READING EDITOR -->
+    <div id="modal-edit-ruby" class="modal-overlay hidden" onclick="if(event.target===this) App.toggleModal('modal-edit-ruby')">
+        <div class="popover" role="dialog" aria-modal="true" aria-labelledby="edit-reading-title">
+            <h2 class="popover-title" id="edit-reading-title">Edit reading</h2>
+            <div>
+                <div class="toolbar-label">BASE TEXT</div>
+                <div id="edit-ruby-base" style="margin-top:6px; color:var(--rp-text); font-size:1.45rem;"></div>
+            </div>
+            <label for="edit-ruby-input" class="toolbar-label">READING</label>
+            <input id="edit-ruby-input" class="popover-input" type="text" lang="ja" autocomplete="off" spellcheck="false">
+            <div style="display:flex; justify-content:space-between; gap:8px; margin-top:4px;">
+                <button class="btn" onclick="Furigana.resetRubyEdit()">Remove reading</button>
+                <div style="display:flex; gap:8px;">
+                    <button class="btn" onclick="App.toggleModal('modal-edit-ruby')">Cancel</button>
+                    <button class="btn btn-primary" onclick="Furigana.saveRubyEdit()">Save</button>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- LIBRARY -->
+    <div id="view-library">
+        <h1 style="color: var(--primary); letter-spacing: 2px; font-weight: normal; margin-bottom: 20px;">tsubuyaki</h1>
+        
+        <div id="drop-zone" class="drop-zone">
+            <svg class="app-icon drop-zone-icon" aria-hidden="true"><use href="#icon-rose"></use></svg>
+            <div style="display:flex; flex-direction:column; align-items: flex-start;">
+                <div style="color: var(--rp-text); font-weight: bold; font-size: 1rem;">Open Media &amp; Subtitles</div>
+                <div style="color: var(--rp-subtle); font-size: 0.8rem;">Video: MP4, WebM, MKV, MOV, M4V, OGV, AVI · Audio: MP3, M4A, M4B, AAC, OGG, OPUS, WAV, FLAC · SRT/JSON</div>
+            </div>
+            <input type="file" id="file-input" hidden multiple accept="video/*,audio/*,.mp4,.m4v,.webm,.mov,.mkv,.ogv,.avi,.mpeg,.mpg,.mp3,.m4b,.aac,.m4a,.ogg,.oga,.opus,.wav,.flac,.srt,.json">
+        </div>
+
+        <h3 style="align-self: flex-start; margin-bottom: 10px; color: var(--rp-muted); font-size: 0.9rem; text-transform: uppercase; letter-spacing: 1px;">Library</h3>
+        <div id="library-list"></div>
+        <div class="version-footer">tsubuyaki · v0.1.0</div>
+    </div>
+    
+    <!-- PLAYER -->
+    <div id="view-player" class="hidden">
+        <header class="app-header">
+            <div class="header-left">
+                <button class="btn header-action" onclick="App.showLibrary()"><svg class="app-icon header-icon" aria-hidden="true"><use href="#icon-arrow-left"></use></svg><span class="header-label">Library</span></button>
+                <span class="brand-mark">TSUBUYAKI</span>
+            </div>
+            <div id="player-title-container">
+                <div id="player-title">...</div>
+            </div>
+            <div class="header-actions">
+                <button class="btn header-action" onclick="App.showBookmarks()" title="Bookmarks"><svg class="app-icon header-icon" aria-hidden="true"><use href="#icon-bookmark"></use></svg><span class="header-label">Bookmarks</span></button>
+                <button class="btn header-action" onclick="App.toggleChapters()"><svg class="app-icon header-icon" aria-hidden="true"><use href="#icon-list"></use></svg><span class="header-label">Chapters</span></button>
+                <button class="btn header-action" onclick="App.toggleFocusMode()"><svg class="app-icon header-icon" aria-hidden="true"><use href="#icon-focus"></use></svg><span class="header-label">Focus</span></button>
+                <button class="icon-btn" onclick="App.toggleModal('modal-settings')" title="Settings" aria-label="Settings"><svg class="app-icon" aria-hidden="true"><use href="#icon-sliders"></use></svg></button>
+                <button class="icon-btn" onclick="App.toggleModal('modal-help')" title="Keyboard shortcuts" aria-label="Keyboard shortcuts"><svg class="app-icon" aria-hidden="true"><use href="#icon-help"></use></svg></button>
+            </div>
+        </header>
+
+        <div id="furigana-toolbar" class="hidden">
+            <div class="toolbar-group primary-action">
+                <button class="btn btn-primary" id="btn-gen-furigana" onclick="Furigana.generate()">Generate furigana</button>
+                <button class="btn compact-btn hidden" id="btn-cancel-gen" onclick="Furigana.cancel()">Cancel</button>
+                <span id="gen-status" class="status-pill">
+                    <span class="status-dot" aria-hidden="true"></span>
+                    <span id="gen-status-text">Backend offline</span>
+                </span>
+            </div>
+            <div class="toolbar-group display-options">
+                <span class="toolbar-label">Furigana</span>
+                <span class="furigana-mode-switch" role="group" aria-label="Furigana display mode">
+                    <button class="furigana-mode-option" id="btn-furigana-always" onclick="Furigana.setDisplayMode('always')" aria-pressed="true">Always</button>
+                    <button class="furigana-mode-option" id="btn-furigana-hover" onclick="Furigana.setDisplayMode('hover')" aria-pressed="false">On hover</button>
+                </span>
+                <span class="toolbar-label reading-size-label">Reading size</span>
+                <span class="ruby-size-control">
+                    <input type="range" id="opt-ruby-size" min="30" max="80" value="50" oninput="Furigana.applyRubySize()" title="Reading size">
+                    <output id="ruby-size-value" for="opt-ruby-size">50%</output>
+                </span>
+            </div>
+            <div class="toolbar-group export-actions">
+                <button class="btn compact-btn" onclick="Furigana.exportJson()" title="Download app-native JSON"><span class="export-prefix">Export </span>JSON</button>
+                <button class="btn compact-btn" onclick="Furigana.exportSrt()" title="Download ruby-tagged SRT"><span class="export-prefix">Export </span>SRT</button>
+            </div>
+        </div>
+        <div id="gen-progress-row" class="hidden">
+            <div class="gen-progress-container">
+                <div class="gen-progress-bar">
+                    <div class="gen-progress-fill" id="gen-progress-fill"></div>
+                </div>
+                <span class="gen-progress-text" id="gen-progress-text">0%</span>
+            </div>
+        </div>
+    
+        <div id="player-content">
+            <div id="media-stage" class="media-stage hidden">
+                <video id="media-el" playsinline preload="metadata"></video>
+                <div id="media-error" class="media-error hidden" role="alert"></div>
+            </div>
+            <ul id="sub-list"></ul>
+        </div>
+        
+        <div id="chapter-list"></div>
+    
+        <div id="controls">
+            <div class="timeline-container">
+                <span id="t-curr">00:00</span>
+                <div class="seek-wrapper">
+                    <div class="seek-bg"></div>
+                    <div class="seek-fill" id="seek-fill"></div>
+                    <div id="seek-markers"></div>
+                    <input type="range" id="seek-bar" value="0" step="0.1">
+                </div>
+                <span id="t-total">00:00</span>
+            </div>
+            <div class="buttons-row">
+                <button class="round-btn" onclick="Player.prevSub()" title="Previous line (A)" aria-label="Previous line"><svg class="app-icon" aria-hidden="true"><use href="#icon-skip-back"></use></svg></button>
+                <button class="round-btn" onclick="Player.replaySub()" title="Replay line (S)" aria-label="Replay line"><svg class="app-icon" aria-hidden="true"><use href="#icon-replay"></use></svg></button>
+                <button class="round-btn main" id="btn-play" onclick="Player.togglePlay()" title="Play (Space)" aria-label="Play"><svg class="app-icon" aria-hidden="true"><use href="#icon-play"></use></svg></button>
+                <button class="round-btn" onclick="Player.nextSub()" title="Next line (D)" aria-label="Next line"><svg class="app-icon" aria-hidden="true"><use href="#icon-skip-forward"></use></svg></button>
+            </div>
+        </div>
+    </div>
+    
+    <!-- FOCUS -->
+    <div id="view-focus" class="hidden">
+        <div id="focus-text">...</div>
+        <div id="focus-hint">Tap Center: Play • Tap Sides: Seek • Hold/Esc: Exit</div>
+    </div>
+    
+    <script>
+    // --- UTILS ---
+    const Utils = {
+        async read(file, start, len) {
+            if (start >= file.size) throw new Error("OOB");
+            const chunk = file.slice(start, start + len);
+            return new DataView(await chunk.arrayBuffer());
+        },
+        readStr(view, offset, len) {
+            return new TextDecoder().decode(new Uint8Array(view.buffer, offset, len));
+        },
+        fmtTime(s) {
+            if (isNaN(s)) return "00:00";
+            const h = Math.floor(s / 3600);
+            const m = Math.floor((s % 3600) / 60);
+            const sec = Math.floor(s % 60);
+            if (h > 0) return `${h}:${m.toString().padStart(2,'0')}:${sec.toString().padStart(2,'0')}`;
+            return `${m}:${sec.toString().padStart(2,'0')}`;
+        }
+    };
+
+    function iconSvg(name) {
+        return `<svg class="app-icon" aria-hidden="true" focusable="false"><use href="#icon-${name}"></use></svg>`;
+    }
+
+    const AUDIO_EXTENSIONS = new Set([
+        'mp3', 'm4b', 'aac', 'm4a', 'ogg', 'oga', 'opus', 'wav', 'flac'
+    ]);
+    const VIDEO_EXTENSIONS = new Set([
+        'mp4', 'm4v', 'webm', 'mov', 'mkv', 'ogv', 'avi', 'mpeg', 'mpg'
+    ]);
+    const MEDIA_EXTENSIONS = new Set([...AUDIO_EXTENSIONS, ...VIDEO_EXTENSIONS]);
+
+    function getExtension(name = '') {
+        const parts = name.toLowerCase().split('.');
+        return parts.length > 1 ? parts.pop() : '';
+    }
+
+    function getMediaKind(file) {
+        const extension = getExtension(file?.name || '');
+        if (VIDEO_EXTENSIONS.has(extension) || file?.type?.startsWith('video/')) return 'video';
+        if (AUDIO_EXTENSIONS.has(extension) || file?.type?.startsWith('audio/')) return 'audio';
+        return null;
+    }
+
+    // --- PARSERS ---
+    const M4BParser = {
+        async parse(file) {
+            const context = { file: file, meta: { cover: null, tags: {}, chapters: [] } };
+            try {
+                const moov = await this.findAtom(context, 0, file.size, 'moov');
+                if (!moov) return context.meta;
+
+                // Chapters & Meta
+                const udta = await this.findAtom(context, moov.contentStart, moov.end, 'udta');
+                if (udta) {
+                    const chpl = await this.findAtom(context, udta.contentStart, udta.end, 'chpl');
+                    if (chpl) await this.parseChpl(context, chpl);
+                    
+                    const metaAtom = await this.findAtom(context, udta.contentStart, udta.end, 'meta');
+                    if (metaAtom) {
+                        const ilst = await this.findAtom(context, metaAtom.contentStart + 4, metaAtom.end, 'ilst');
+                        if (ilst) await this.parseIlst(context, ilst);
+                    }
+                }
+                
+                // Text Tracks
+                await this.parseTracks(context, moov);
+            } catch (e) { console.warn("M4B Parse Error", e); }
+            return context.meta;
+        },
+        async findAtom(ctx, start, end, targetName) {
+            let cur = start;
+            while (cur < end) {
+                if (cur + 8 > ctx.file.size) break;
+                const h = await Utils.read(ctx.file, cur, 8);
+                let size = h.getUint32(0);
+                const type = Utils.readStr(h, 4, 4);
+                let headerSize = 8;
+                let actualSize = size;
+                if (size === 1) {
+                    const h2 = await Utils.read(ctx.file, cur + 8, 8);
+                    actualSize = Number(h2.getBigUint64(0)); headerSize = 16;
+                } else if (size === 0) actualSize = end - cur;
+                if (type === targetName) return { start: cur, contentStart: cur + headerSize, end: cur + actualSize, size: actualSize };
+                cur += actualSize;
+            }
+            return null;
+        },
+        async parseChpl(ctx, atom) {
+            const view = await Utils.read(ctx.file, atom.contentStart, atom.size - 8);
+            const count = view.getUint32(4);
+            let ptr = 8; const dec = new TextDecoder('utf-8');
+            for(let i=0; i<count; i++) {
+                if (ptr >= view.byteLength) break;
+                const startTs = Number(view.getBigUint64(ptr)) / 10000000; ptr += 8;
+                const len = view.getUint8(ptr); ptr++;
+                let title = dec.decode(new Uint8Array(view.buffer, ptr, len)); ptr += len;
+                ctx.meta.chapters.push({ start: startTs, title });
+            }
+        },
+        async parseIlst(ctx, atom) {
+            let cur = atom.contentStart;
+            while (cur < atom.end) {
+                if (cur + 8 > ctx.file.size) break;
+                const h = await Utils.read(ctx.file, cur, 8);
+                const size = h.getUint32(0);
+                const type = Utils.readStr(h, 4, 4);
+                if (size === 0) break;
+                if (type === 'covr') {
+                    const dataAtom = await this.findAtom(ctx, cur + 8, cur + size, 'data');
+                    if (dataAtom) {
+                        const head = await Utils.read(ctx.file, dataAtom.start, 16);
+                        const flag = head.getUint32(8);
+                        let mime = (flag === 14) ? 'image/png' : 'image/jpeg';
+                        const imgStart = dataAtom.start + 16;
+                        const imgSize = dataAtom.size - 16;
+                        ctx.meta.cover = { blob: ctx.file.slice(imgStart, imgStart + imgSize), mime };
+                    }
+                } else if (['©nam','©ART','©alb'].includes(type)) {
+                    const dataAtom = await this.findAtom(ctx, cur + 8, cur + size, 'data');
+                    if (dataAtom) {
+                        const txtLen = dataAtom.size - 16;
+                        if (txtLen > 0) {
+                            const txtView = await Utils.read(ctx.file, dataAtom.contentStart + 8, txtLen);
+                            const val = Utils.readStr(txtView, 0, txtLen);
+                            const map = {'©nam':'Title'};
+                            if (map[type]) ctx.meta.tags[map[type]] = val;
+                        }
+                    }
+                }
+                cur += size;
+            }
+        },
+        async parseTracks(ctx, moovAtom) {
+            let cur = moovAtom.contentStart;
+            while (cur < moovAtom.end) {
+                const h = await Utils.read(ctx.file, cur, 8);
+                const size = h.getUint32(0);
+                const type = Utils.readStr(h, 4, 4);
+                if (size === 0) break;
+                if (type === 'trak') await this.inspectTrak(ctx, { start: cur, contentStart: cur + 8, end: cur + size });
+                cur += size;
+            }
+        },
+        async inspectTrak(ctx, trak) {
+            const mdia = await this.findAtom(ctx, trak.contentStart, trak.end, 'mdia'); if (!mdia) return;
+            const hdlr = await this.findAtom(ctx, mdia.contentStart, mdia.end, 'hdlr'); if (!hdlr) return;
+            const hdlrView = await Utils.read(ctx.file, hdlr.contentStart, hdlr.size - 8);
+            const subType = Utils.readStr(hdlrView, 8, 4);
+            if (subType === 'text' || subType === 'sbtl') await this.parseTextTrack(ctx, mdia);
+        },
+        async parseTextTrack(ctx, mdia) {
+            const minf = await this.findAtom(ctx, mdia.contentStart, mdia.end, 'minf'); if (!minf) return;
+            const stbl = await this.findAtom(ctx, minf.contentStart, minf.end, 'stbl'); if (!stbl) return;
+            const stts = await this.findAtom(ctx, stbl.contentStart, stbl.end, 'stts');
+            const stsz = await this.findAtom(ctx, stbl.contentStart, stbl.end, 'stsz');
+            const stsc = await this.findAtom(ctx, stbl.contentStart, stbl.end, 'stsc');
+            const co = await this.findAtom(ctx, stbl.contentStart, stbl.end, 'stco') || await this.findAtom(ctx, stbl.contentStart, stbl.end, 'co64');
+            if (!stts || !stsz || !stsc || !co) return;
+
+            const mdhd = await this.findAtom(ctx, mdia.contentStart, mdia.end, 'mdhd');
+            const mdhdView = await Utils.read(ctx.file, mdhd.contentStart, 24);
+            const ver = mdhdView.getUint8(0);
+            const timescale = mdhdView.getUint32(ver === 1 ? 20 : 12);
+
+            const sttsView = await Utils.read(ctx.file, stts.contentStart, stts.size-8);
+            const sttsCount = sttsView.getUint32(4);
+            let durations = [], ptr = 8;
+            for(let i=0; i<sttsCount; i++) {
+                const c = sttsView.getUint32(ptr), d = sttsView.getUint32(ptr+4); ptr+=8;
+                for(let j=0; j<c; j++) durations.push(d);
+            }
+
+            const stszView = await Utils.read(ctx.file, stsz.contentStart, stsz.size-8);
+            const uSz = stszView.getUint32(4), sCnt = stszView.getUint32(8);
+            let sizes = [];
+            if (uSz !== 0) { for(let i=0; i<sCnt; i++) sizes.push(uSz); }
+            else { ptr = 12; for(let i=0; i<sCnt; i++) { sizes.push(stszView.getUint32(ptr)); ptr+=4; } }
+
+            let chunks = [];
+            const coView = await Utils.read(ctx.file, co.contentStart, co.size-8);
+            const coCnt = coView.getUint32(4); ptr = 8;
+            const coType = Utils.readStr({buffer:(await Utils.read(ctx.file, co.start+4, 4)).buffer},0,4);
+            for(let i=0; i<coCnt; i++) { 
+                if(coType==='stco') { chunks.push(coView.getUint32(ptr)); ptr+=4; }
+                else { chunks.push(Number(coView.getBigUint64(ptr))); ptr+=8; }
+            }
+
+            const stscView = await Utils.read(ctx.file, stsc.contentStart, stsc.size-8);
+            const stscCnt = stscView.getUint32(4);
+            let stscE = []; ptr=8;
+            for(let i=0; i<stscCnt; i++) { stscE.push({f:stscView.getUint32(ptr), c:stscView.getUint32(ptr+4)}); ptr+=12; }
+
+            let currTime=0, sIdx=0, stscIdx=0; const dec = new TextDecoder('utf-8');
+            for(let cIdx=0; cIdx<chunks.length; cIdx++) {
+                if(stscIdx<stscE.length-1 && (cIdx+1)>=stscE[stscIdx+1].f) stscIdx++;
+                const nSamp = stscE[stscIdx].c;
+                let offset = chunks[cIdx];
+                for(let i=0; i<nSamp; i++) {
+                    if(sIdx>=sCnt) break;
+                    const sz=sizes[sIdx], dur=durations[sIdx];
+                    if(sz>2) {
+                        const txtView = await Utils.read(ctx.file, offset, sz);
+                        const txtLen = txtView.getUint16(0);
+                        let title = (txtLen===sz-2) ? dec.decode(new Uint8Array(txtView.buffer, 2, txtLen)) : dec.decode(new Uint8Array(txtView.buffer, 0, sz));
+                        title = title.replace(/[\x00-\x1F]/g,'').replace(/\s*encd.*$/i,'').trim();
+                        ctx.meta.chapters.push({start: currTime/timescale, title});
+                    }
+                    currTime+=dur; offset+=sz; sIdx++;
+                }
+            }
+        }
+    };
+
+    const ID3Parser = {
+        async parse(file) {
+            const meta = { cover: null, tags: {}, chapters: [] };
+            const h = await Utils.read(file, 0, 10);
+            if (Utils.readStr(h, 0, 3) !== 'ID3') return meta;
+            const fnSize = (h.getUint8(6)<<21)|(h.getUint8(7)<<14)|(h.getUint8(8)<<7)|h.getUint8(9);
+            let pos = 10; const limit = 10 + fnSize;
+            while (pos < limit) {
+                const fh = await Utils.read(file, pos, 10);
+                const id = Utils.readStr(fh, 0, 4);
+                const size = fh.getUint32(4);
+                if (id.charCodeAt(0) === 0) break;
+                if (id === 'APIC') {
+                    const fBuf = await Utils.read(file, pos+10, size);
+                    const view = new DataView(fBuf.buffer);
+                    let ptr = 0, mime = "";
+                    ptr++; 
+                    while(ptr<size && view.getUint8(ptr)!==0) { mime += String.fromCharCode(view.getUint8(ptr)); ptr++; }
+                    ptr++; ptr++; 
+                    while(ptr<size && view.getUint8(ptr)!==0) ptr++; 
+                    ptr++;
+                    while(ptr<size && view.getUint8(ptr)===0) ptr++; 
+                    meta.cover = { blob: file.slice(pos+10+ptr, pos+10+size), mime: mime || 'image/jpeg' };
+                } else if (id === 'TIT2') {
+                    const fBuf = await Utils.read(file, pos+10, size);
+                    const dec = new TextDecoder('utf-8');
+                    meta.tags.Title = dec.decode(new Uint8Array(fBuf.buffer).slice(1)).replace(/\0/g,'');
+                }
+                pos += 10 + size;
+            }
+            return meta;
+        }
+    };
+    
+    // --- DB & APP ---
+    const DB = {
+        db: null,
+        async init() {
+            return new Promise((resolve, reject) => {
+                const req = indexedDB.open('KikiYomiDB', 1);
+                req.onupgradeneeded = (e) => {
+                    const db = e.target.result;
+                    if (!db.objectStoreNames.contains('metadata')) db.createObjectStore('metadata', { keyPath: 'id' });
+                    if (!db.objectStoreNames.contains('media')) db.createObjectStore('media', { keyPath: 'key' });
+                };
+                req.onsuccess = (e) => { this.db = e.target.result; resolve(); };
+                req.onerror = (e) => reject(e);
+            });
+        },
+        async saveMetadata(book) {
+            const tx = this.db.transaction('metadata', 'readwrite');
+            tx.objectStore('metadata').put(book);
+            return new Promise(r => tx.oncomplete = r);
+        },
+        async deleteMetadata(id) {
+            const tx = this.db.transaction('metadata', 'readwrite');
+            tx.objectStore('metadata').delete(id);
+            return new Promise(r => tx.oncomplete = r);
+        },
+        async getAllMetadata() {
+            return new Promise(r => {
+                const req = this.db.transaction('metadata').objectStore('metadata').getAll();
+                req.onsuccess = () => r(req.result);
+            });
+        },
+        async setActiveAudio(blob) {
+            const tx = this.db.transaction('media', 'readwrite');
+            tx.objectStore('media').put({ key: 'active', blob: blob });
+            return new Promise(r => tx.oncomplete = r);
+        },
+        async getActiveAudio() {
+            return new Promise(r => {
+                const req = this.db.transaction('media').objectStore('media').get('active');
+                req.onsuccess = () => r(req.result ? req.result.blob : null);
+            });
+        },
+        async clearActive() {
+            const tx = this.db.transaction('media', 'readwrite');
+            tx.objectStore('media').delete('active');
+            return new Promise(r => tx.oncomplete = r);
+        }
+    };
+    
+    const App = {
+        currentBook: null, activeAudioBlob: null,
+        settings: { font: '', size: 36, fillGap: true, bold: false, focusWidth: 90, activeScale: 1.05 },
+        async init() {
+            await DB.init();
+            this.loadSettings();
+            Furigana.init();
+            this.renderLibrary();
+            const dz = document.getElementById('drop-zone');
+            
+            // The standard picker works on desktop and mobile and supports
+            // selecting the media file together with its subtitle file.
+            dz.onclick = () => document.getElementById('file-input').click();
+            
+            document.getElementById('file-input').onchange = (e) => {
+                const selectedFiles = Array.from(e.target.files);
+                e.target.value = '';
+                this.handleFiles(selectedFiles);
+            };
+            document.getElementById('srt-upload').onchange = (e) => this.handleSubUpload(e.target.files[0]);
+            ['dragenter', 'dragover', 'dragleave', 'drop'].forEach(n => {
+                document.body.addEventListener(n, e => { e.preventDefault(); e.stopPropagation(); }, false);
+            });
+            document.body.addEventListener('dragover', () => dz.classList.add('dragover'));
+            document.body.addEventListener('dragleave', () => dz.classList.remove('dragover'));
+            
+            document.body.addEventListener('drop', async (e) => {
+                dz.classList.remove('dragover');
+                const filePromises = [...e.dataTransfer.items]
+                    .filter(item => item.kind === 'file')
+                    .map(async (item) => {
+                        const file = item.getAsFile();
+                        let handle = null;
+                        if ('getAsFileSystemHandle' in item) {
+                            try { handle = await item.getAsFileSystemHandle(); } catch(err){}
+                        }
+                        if(handle && handle.kind === 'file') file.handle = handle;
+                        return file;
+                    });
+                
+                if (filePromises.length > 0) {
+                    const files = await Promise.all(filePromises);
+                    this.handleFiles(files);
+                } else {
+                    this.handleFiles(e.dataTransfer.files);
+                }
+            });
+            Input.init();
+            if ('serviceWorker' in navigator) {
+                navigator.serviceWorker.register('service-worker.js?v=6').catch(err => console.warn('SW registration failed:', err));
+            }
+        },
+        async pickFile() {
+            try {
+                const handles = await window.showOpenFilePicker({
+                    types: [{
+                        description: 'Media & Subtitles',
+                        accept: {
+                            'video/*': ['.mp4', '.m4v', '.webm', '.mov', '.mkv', '.ogv', '.avi', '.mpeg', '.mpg'],
+                            'audio/*': ['.mp3', '.m4b', '.aac', '.m4a', '.ogg', '.oga', '.opus', '.wav', '.flac'],
+                            'text/plain': ['.srt', '.json']
+                        }
+                    }],
+                    multiple: true
+                });
+                const files = [];
+                for (const h of handles) {
+                    const f = await h.getFile(); f.handle = h; files.push(f);
+                }
+                this.handleFiles(files);
+            } catch(e) { }
+        },
+        loadSettings() {
+            this.settings.font = localStorage.getItem('ky_font') || "system-ui, -apple-system, sans-serif";
+            this.settings.size = parseInt(localStorage.getItem('ky_size') || "36");
+            this.settings.fillGap = localStorage.getItem('ky_fill') !== "false"; 
+            this.settings.bold = localStorage.getItem('ky_bold') === "true"; 
+            this.settings.focusWidth = parseInt(localStorage.getItem('ky_focus_width') || "90");
+            this.settings.activeScale = parseFloat(localStorage.getItem('ky_active_scale') || "1.05");
+    
+            document.getElementById('opt-font').value = this.settings.font;
+            document.getElementById('opt-size').value = this.settings.size;
+            document.getElementById('opt-fill').checked = this.settings.fillGap;
+            document.getElementById('opt-bold').checked = this.settings.bold;
+            document.getElementById('opt-focus-width').value = this.settings.focusWidth;
+            document.getElementById('opt-active-scale').value = this.settings.activeScale;
+            this.applySettings();
+        },
+        applySettings() {
+            this.settings.font = document.getElementById('opt-font').value;
+            this.settings.size = parseInt(document.getElementById('opt-size').value);
+            this.settings.fillGap = document.getElementById('opt-fill').checked;
+            this.settings.bold = document.getElementById('opt-bold').checked;
+            this.settings.focusWidth = parseInt(document.getElementById('opt-focus-width').value);
+            this.settings.activeScale = parseFloat(document.getElementById('opt-active-scale').value);
+    
+            document.documentElement.style.setProperty('--font-reader', this.settings.font);
+            document.documentElement.style.setProperty('--font-size-base', this.settings.size + 'px');
+            document.documentElement.style.setProperty('--active-weight', this.settings.bold ? 'bold' : 'normal');
+            document.documentElement.style.setProperty('--focus-width', this.settings.focusWidth + '%');
+            document.documentElement.style.setProperty('--active-scale', this.settings.activeScale);
+    
+            localStorage.setItem('ky_font', this.settings.font);
+            localStorage.setItem('ky_size', this.settings.size);
+            localStorage.setItem('ky_fill', this.settings.fillGap);
+            localStorage.setItem('ky_bold', this.settings.bold);
+            localStorage.setItem('ky_focus_width', this.settings.focusWidth);
+            localStorage.setItem('ky_active_scale', this.settings.activeScale);
+            
+            if (Player.meta) Player.syncSub(); 
+        },
+        toggleModal(id) { document.getElementById(id).classList.toggle('hidden'); },
+        async renderLibrary() {
+            document.getElementById('view-library').classList.remove('hidden');
+            document.getElementById('view-player').classList.add('hidden');
+            document.getElementById('view-focus').classList.add('hidden');
+            
+            const allBooks = await DB.getAllMetadata();
+            allBooks.sort((a, b) => b.lastPlayed - a.lastPlayed);
+            const cachedAudio = await DB.getActiveAudio();
+            const activeId = localStorage.getItem('activeBookId');
+            
+            const list = document.getElementById('library-list');
+            list.innerHTML = '';
+            
+            allBooks.forEach(book => {
+                const isActive = (book.id === activeId);
+                const isCached = isActive && cachedAudio;
+                
+                const div = document.createElement('div');
+                div.className = 'lib-item';
+                if (isActive && isCached) div.classList.add('active-book');
+                
+                let badges = '';
+                if (isActive && isCached) badges += '<span class="badge playing">Now Playing</span> ';
+                else if (book.handle) badges += '<span class="badge linked">Linked</span> ';
+                
+                const pct = book.duration > 0 ? (book.progress / book.duration * 100).toFixed(1) : 0;
+                
+                let imgHtml = `<div class="lib-cover">${iconSvg(book.mediaKind === 'video' ? 'video' : 'headphones')}</div>`;
+                if (book.cover && book.cover.blob) {
+                    const url = URL.createObjectURL(book.cover.blob);
+                    imgHtml = `<img class="lib-cover" src="${url}">`;
+                }
+
+                div.innerHTML = `
+                <div style="display:flex; align-items:center; flex:1; height:100%; overflow:hidden;" onclick="App.loadBookFromHistory('${book.id}')">
+                    ${imgHtml}
+                    <div class="lib-info">
+                        <div class="lib-title">${book.title}</div>
+                        <div class="lib-meta">${Utils.fmtTime(book.progress)} / ${Utils.fmtTime(book.duration)} ${badges}</div>
+                        <div class="progress-bar-mini"><div class="progress-fill-mini" style="width:${pct}%"></div></div>
+                    </div>
+                </div>
+                <button class="del-btn" onclick="App.deleteBook('${book.id}', event)" title="Remove from library" aria-label="Remove from library">${iconSvg('trash')}</button>`;
+                list.appendChild(div);
+            });
+            
+            if (list.children.length === 0) {
+                list.innerHTML = '<div style="text-align:center; padding:20px; color:var(--rp-muted);">Library is empty</div>';
+            }
+        },
+        async showBookmarks() {
+            document.getElementById('modal-bookmarks').classList.remove('hidden');
+            const select = document.getElementById('bm-filter');
+            
+            // Populate Dropdown
+            const books = await DB.getAllMetadata();
+            select.innerHTML = `<option value="all">All Books</option>`;
+            
+            // If current book exists, add it as separate option first
+            if(this.currentBook) {
+                select.innerHTML += `<option value="current" selected>Current Book</option>`;
+            }
+            
+            // Add other books
+            books.forEach(b => {
+                if(this.currentBook && b.id === this.currentBook.id) return;
+                select.innerHTML += `<option value="${b.id}">${b.title}</option>`;
+            });
+
+            this.renderBookmarkList();
+        },
+        async renderBookmarkList() {
+            const list = document.getElementById('bm-list');
+            list.innerHTML = '<div class="spinner" style="margin:20px auto;"></div>';
+            
+            const filter = document.getElementById('bm-filter').value;
+            const books = await DB.getAllMetadata();
+            let bookmarks = [];
+            
+            books.forEach(b => {
+                // Filter logic
+                if(filter === 'current' && this.currentBook && b.id !== this.currentBook.id) return;
+                if(filter !== 'all' && filter !== 'current' && b.id !== filter) return;
+
+                if(b.bookmarks && b.bookmarks.length > 0) {
+                    b.bookmarks.forEach(bm => {
+                        bookmarks.push({ ...bm, bookId: b.id, bookTitle: b.title });
+                    });
+                }
+            });
+            
+            // Sort by creation time (newest first)
+            bookmarks.sort((a,b) => b.created - a.created);
+            this.currentExportData = bookmarks;
+            
+            list.innerHTML = '';
+            if(bookmarks.length === 0) {
+                list.innerHTML = '<div style="padding:20px; text-align:center; color:var(--rp-muted);">No bookmarks found.</div>';
+                return;
+            }
+            
+            bookmarks.forEach(bm => {
+                const el = document.createElement('div');
+                el.className = 'bm-item';
+                el.innerHTML = `
+                    <div class="bm-content" onclick="App.handleBmClick('${bm.bookId}', ${bm.start})">
+                        <div class="bm-text">"${bm.text}"</div>
+                        <div class="bm-meta">
+                            <span class="bm-book-title">${bm.bookTitle}</span>
+                            <span>${Utils.fmtTime(bm.start)}</span>
+                        </div>
+                    </div>
+                    <button class="bm-del-btn" onclick="App.deleteBookmark('${bm.bookId}', ${bm.start}, event)" title="Delete bookmark" aria-label="Delete bookmark">${iconSvg('trash')}</button>
+                `;
+                list.appendChild(el);
+            });
+        },
+        handleBmClick(bookId, time) {
+            this.toggleModal('modal-bookmarks');
+            this.jumpToBookmark(bookId, time);
+        },
+        async deleteBookmark(bookId, start, event) {
+            event.stopPropagation();
+            if(!confirm("Delete this bookmark?")) return;
+            
+            const books = await DB.getAllMetadata();
+            const book = books.find(b => b.id === bookId);
+            if(book && book.bookmarks) {
+                book.bookmarks = book.bookmarks.filter(bm => bm.start !== start);
+                await DB.saveMetadata(book);
+                
+                // If this is the current book active in player, update state
+                if(this.currentBook && this.currentBook.id === bookId) {
+                    this.currentBook = book;
+                    Player.meta = book;
+                    Player.renderSubs(); // Re-render to remove star from UI
+                }
+                
+                this.renderBookmarkList();
+            }
+        },
+        async exportBookmarks() {
+            if(!this.currentExportData || this.currentExportData.length === 0) return alert("No bookmarks to export.");
+            const header = ["Book Title", "Text", "Time Start", "Time End", "Created Date"];
+            const rows = this.currentExportData.map(bm => [
+                `"${bm.bookTitle.replace(/"/g, '""')}"`,
+                `"${bm.text.replace(/"/g, '""')}"`,
+                bm.start,
+                bm.end,
+                new Date(bm.created).toISOString()
+            ]);
+            
+            const csvContent = [header.join(","), ...rows.map(r => r.join(","))].join("\n");
+            const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+            const url = URL.createObjectURL(blob);
+            const link = document.createElement("a");
+            link.setAttribute("href", url);
+            link.setAttribute("download", "tsubuyaki_bookmarks.csv");
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+        },
+        async jumpToBookmark(bookId, time) {
+            // If already in the correct book, just seek
+            if(this.currentBook && this.currentBook.id === bookId) {
+                Player.audio.currentTime = time;
+                return;
+            }
+            // Otherwise load the book then seek
+            await this.loadBookFromHistory(bookId, time);
+        },
+        async handleFiles(files) {
+            document.getElementById('loading-overlay').classList.remove('hidden');
+            setTimeout(async () => {
+                try {
+                    let mediaFile = null, srtFile = null, jsonSubFile = null, jsonChapFile = null;
+                    for (let f of files) {
+                        const ext = getExtension(f.name);
+                        if (MEDIA_EXTENSIONS.has(ext) || getMediaKind(f)) mediaFile = f;
+                        if (ext === 'srt') srtFile = f;
+                        if (ext === 'json') {
+                            if (f.name.endsWith('.furigana.json')) {
+                                jsonSubFile = f;
+                            } else {
+                                jsonChapFile = f;
+                            }
+                        }
+                    }
+                    if (mediaFile) {
+                        const mediaKind = getMediaKind(mediaFile);
+                        const id = "b_" + Math.abs(this.hashCode(mediaFile.name));
+                        let meta = (await DB.getAllMetadata()).find(b => b.id === id);
+                        if (!meta) {
+                            meta = {
+                                id: id, title: mediaFile.name.replace(/\.[^.]+$/i, ''),
+                                duration: 0, progress: 0, lastPlayed: Date.now(), subs: [], chapters: [], bookmarks: [], cover: null
+                            };
+                        }
+                        meta.mediaKind = mediaKind;
+                        meta.fileName = mediaFile.name;
+                        if (mediaFile.handle) meta.handle = mediaFile.handle;
+                        if (!meta.bookmarks) meta.bookmarks = []; // Schema migration
+                        
+                        let parsed = {};
+                        const mediaExt = getExtension(mediaFile.name);
+                        if (mediaExt === 'mp3') parsed = await ID3Parser.parse(mediaFile);
+                        else if (['m4b', 'm4a', 'aac'].includes(mediaExt)) parsed = await M4BParser.parse(mediaFile);
+                        
+                        if (parsed.chapters && parsed.chapters.length) meta.chapters = parsed.chapters;
+                        if (parsed.cover) meta.cover = parsed.cover;
+                        if (parsed.tags && parsed.tags.Title && meta.progress === 0) meta.title = parsed.tags.Title;
+
+                        if (jsonSubFile) {
+                            meta.subs = await Furigana.parseJsonSubs(jsonSubFile);
+                        } else if (srtFile) {
+                            meta.subs = await this.parseSrt(srtFile);
+                        }
+                        
+                        if (jsonChapFile) meta.chapters = await this.parseJsonChapters(jsonChapFile);
+                        
+                        await DB.setActiveAudio(mediaFile);
+                        await DB.saveMetadata(meta);
+                        localStorage.setItem('activeBookId', id);
+                        this.currentBook = meta;
+                        this.activeAudioBlob = mediaFile;
+                        this.launchPlayer();
+                    } else if (srtFile) { alert("Please add the media file too, or drop the .srt file into the player after media is loaded."); }
+                    else if (jsonSubFile) { alert("Please add the media file too."); }
+                    else { alert("No supported media file was selected."); }
+                } catch (e) { console.error(e); alert("Error processing file."); } 
+                finally { document.getElementById('loading-overlay').classList.add('hidden'); }
+            }, 50);
+        },
+        async handleSubUpload(file) {
+            if (!file || !this.currentBook) return;
+            try {
+                let subs = [];
+                const ext = file.name.split('.').pop().toLowerCase();
+                if (ext === 'json' && file.name.endsWith('.furigana.json')) {
+                    subs = await Furigana.parseJsonSubs(file);
+                } else if (ext === 'srt') {
+                    subs = await this.parseSrt(file);
+                } else {
+                    alert("Only .srt and .furigana.json subtitle files are supported.");
+                    return;
+                }
+                this.currentBook.subs = subs;
+                await DB.saveMetadata(this.currentBook);
+                Player.meta = this.currentBook;
+                Player.subs = subs;
+                Player.renderSubs();
+                Player.syncSub();
+                alert("Subtitles loaded!");
+            } catch(e) { alert("Failed to parse subtitles"); }
+        },
+        async loadBookFromHistory(id, seekTo = null) {
+            const books = await DB.getAllMetadata();
+            const book = books.find(b => b.id === id);
+            if(!book) return;
+            
+            // Ensure schema
+            if(!book.bookmarks) book.bookmarks = [];
+
+            const activeId = localStorage.getItem('activeBookId');
+            if (activeId === book.id) {
+                const blob = await DB.getActiveAudio();
+                if (blob) { 
+                    this.currentBook = book; this.activeAudioBlob = blob; 
+                    this.launchPlayer(seekTo); return; 
+                }
+            }
+    
+            if (book.handle) {
+                try {
+                    const perm = await book.handle.queryPermission({ mode: 'read' });
+                    if (perm === 'granted' || (await book.handle.requestPermission({ mode: 'read' })) === 'granted') {
+                        const file = await book.handle.getFile();
+                        file.handle = book.handle;
+                        await DB.setActiveAudio(file);
+                        localStorage.setItem('activeBookId', book.id);
+                        this.currentBook = book;
+                        this.activeAudioBlob = file;
+                        this.launchPlayer(seekTo);
+                        return;
+                    }
+                } catch (e) { console.warn(e); }
+            }
+    
+            this.pendingBookId = id;
+            this.pendingSeek = seekTo;
+            document.getElementById('req-filename').textContent = book.fileName || (book.title + " (Media File)");
+            document.getElementById('modal-file-req').classList.remove('hidden');
+        },
+        pendingBookId: null,
+        pendingSeek: null,
+        triggerFileSelect() {
+            document.getElementById('modal-file-req').classList.add('hidden');
+            document.getElementById('file-input').click();
+        },
+        async deleteBook(id, event) {
+            event.stopPropagation();
+            if(!confirm("Delete this book's history?")) return;
+            await DB.deleteMetadata(id);
+            const activeId = localStorage.getItem('activeBookId');
+            if(activeId === id) { await DB.clearActive(); localStorage.removeItem('activeBookId'); }
+            this.renderLibrary();
+        },
+        launchPlayer(seekTo = null) {
+            document.getElementById('view-library').classList.add('hidden');
+            document.getElementById('view-player').classList.remove('hidden');
+            Player.load(this.currentBook, this.activeAudioBlob, seekTo);
+        },
+        showLibrary() {
+            Player.pause();
+            document.getElementById('sub-list').innerHTML = '';
+            this.renderLibrary();
+        },
+        toggleFocusMode() {
+            const el = document.getElementById('view-focus');
+            el.classList.toggle('hidden');
+            if (!el.classList.contains('hidden')) { document.documentElement.requestFullscreen().catch(e=>{}); }
+            else { if (document.fullscreenElement) document.exitFullscreen(); }
+        },
+        toggleChapters() {
+            const list = document.getElementById('chapter-list');
+            list.classList.toggle('open');
+            if(list.classList.contains('open')) Player.syncChapterActive();
+        },
+        hashCode(str) {
+            let hash = 0;
+            for (let i = 0; i < str.length; i++) { hash = ((hash << 5) - hash) + str.charCodeAt(i); hash |= 0; }
+            return hash;
+        },
+        async parseSrt(file) {
+            const text = await file.text();
+            const pattern = /(\d+)\n(\d{2}:\d{2}:\d{2},\d{3}) --> (\d{2}:\d{2}:\d{2},\d{3})\n((?:(?!\d+\n).)*)/gs;
+            const matches = [...text.replace(/\r\n/g, '\n').matchAll(pattern)];
+            return matches.map((m, idx) => {
+                const startSec = this.timeToSec(m[2]);
+                const endSec = this.timeToSec(m[3]);
+                const rawText = m[4].trim();
+                const segments = Furigana.parseRubySrtMarkup(rawText);
+                const plainText = Furigana.stripRubyMarkup(rawText);
+                return {
+                    cue_id: `cue-${idx}`,
+                    start_ms: Math.round(startSec * 1000),
+                    end_ms: Math.round(endSec * 1000),
+                    plain_text: plainText,
+                    segments: segments,
+                    start: startSec,
+                    end: endSec,
+                    text: plainText
+                };
+            });
+        },
+        async parseJsonChapters(file) { try { return JSON.parse(await file.text()); } catch(e) { return []; } },
+        timeToSec(tStr) {
+            const [h, m, s] = tStr.replace(',', '.').split(':');
+            return parseFloat(h)*3600 + parseFloat(m)*60 + parseFloat(s);
+        }
+    };
+    
+    const Player = {
+        // Keep the historical property name so the original kikiyomi controls
+        // continue to work. HTMLVideoElement implements the same media API and
+        // also plays audio-only files.
+        audio: document.getElementById('media-el'),
+        mediaStage: document.getElementById('media-stage'),
+        mediaError: document.getElementById('media-error'),
+        elPlayerContent: document.getElementById('player-content'),
+        objectUrl: null,
+        meta: null, subs: [],
+        elTitle: document.getElementById('player-title'), elSubList: document.getElementById('sub-list'),
+        elSeek: document.getElementById('seek-bar'), elFill: document.getElementById('seek-fill'), elMarkers: document.getElementById('seek-markers'),
+        elTCurr: document.getElementById('t-curr'), elTTotal: document.getElementById('t-total'),
+        elBtnPlay: document.getElementById('btn-play'), elFocusText: document.getElementById('focus-text'),
+        elChapList: document.getElementById('chapter-list'),
+    
+        load(meta, blob, seekTo = null) {
+            this.meta = meta; this.subs = meta.subs || [];
+            if(!this.meta.bookmarks) this.meta.bookmarks = [];
+            let migratedRubySegments = false;
+            this.subs.forEach(s => {
+                if (!s.segments) {
+                    s.segments = [{ type: "text", text: s.text || s.plain_text }];
+                    migratedRubySegments = true;
+                }
+                const normalizedSegments = Furigana.normalizeSegments(s.segments);
+                if (
+                    normalizedSegments.length !== s.segments.length
+                    || normalizedSegments.some((segment, index) => segment !== s.segments[index])
+                ) {
+                    s.segments = normalizedSegments;
+                    migratedRubySegments = true;
+                }
+                if (s.start === undefined) s.start = s.start_ms / 1000;
+                if (s.end === undefined) s.end = s.end_ms / 1000;
+                if (s.text === undefined) s.text = s.plain_text;
+            });
+            if (migratedRubySegments) {
+                this.meta.subs = this.subs;
+                DB.saveMetadata(this.meta).catch(error => console.warn("Could not persist ruby migration:", error));
+            }
+            
+            const fToolbar = document.getElementById('furigana-toolbar');
+            if (this.subs.length > 0) {
+                fToolbar.classList.remove('hidden');
+            } else {
+                fToolbar.classList.add('hidden');
+            }
+            Furigana.checkBackendStatus();
+
+            this.elTitle.textContent = meta.title;
+            const mediaKind = meta.mediaKind || getMediaKind(blob) || 'audio';
+            meta.mediaKind = mediaKind;
+            this.mediaStage.classList.toggle('hidden', mediaKind !== 'video');
+            this.elPlayerContent.classList.toggle('has-video', mediaKind === 'video');
+            this.mediaError.classList.add('hidden');
+            this.mediaError.textContent = '';
+            if (this.objectUrl) URL.revokeObjectURL(this.objectUrl);
+            this.objectUrl = URL.createObjectURL(blob);
+            this.audio.src = this.objectUrl;
+            
+            this.renderSubs(); this.renderChapters();
+            this.audio.onloadedmetadata = () => {
+                this.elSeek.max = this.audio.duration;
+                this.elTTotal.textContent = Utils.fmtTime(this.audio.duration);
+                if (this.meta.duration !== this.audio.duration) { this.meta.duration = this.audio.duration; this.save(); }
+                this.renderMarkers();
+                const targetTime = seekTo !== null ? seekTo : (meta.progress || 0);
+                if (Number.isFinite(targetTime) && targetTime > 0) this.audio.currentTime = targetTime;
+            };
+            this.audio.onerror = () => {
+                if (mediaKind !== 'video') return;
+                const ext = getExtension(meta.fileName || blob.name || '').toUpperCase() || 'file';
+                this.mediaError.textContent = `This browser cannot decode the ${ext} video. The file extension is accepted, but its internal codecs must also be browser-compatible. Remux it to WebM (VP9/Opus) or MP4 (H.264/AAC), then try again.`;
+                this.mediaError.classList.remove('hidden');
+            };
+            this.audio.ontimeupdate = () => {
+                if (!this.isSeeking) { 
+                    this.elSeek.value = this.audio.currentTime; 
+                    this.elTCurr.textContent = Utils.fmtTime(this.audio.currentTime); 
+                    if(this.audio.duration > 0) this.elFill.style.width = (this.audio.currentTime / this.audio.duration * 100) + "%";
+                }
+                this.syncSub(); this.syncChapterActive();
+                if (Math.floor(this.audio.currentTime) % 10 === 0) this.save();
+            };
+            this.audio.onplay = () => this.updateBtn();
+            this.audio.onpause = () => { this.updateBtn(); this.save(); };
+            this.audio.load();
+        },
+        renderSubs() {
+            this.elSubList.innerHTML = '';
+            if (this.subs.length === 0) { 
+                this.elSubList.innerHTML = `
+                    <div class="srt-empty-container">
+                        <div class="srt-empty" onclick="document.getElementById('srt-upload').click()">
+                            <div class="srt-empty-icon">${iconSvg('file-text')}</div>
+                            <div style="font-weight:bold; font-size:1.2rem; margin-bottom:5px;">No Subtitles Loaded</div>
+                            <div style="font-size:0.9rem;">Drop .srt / .json here or click to add</div>
+                        </div>
+                    </div>`; 
+                const emptyZone = this.elSubList.querySelector('.srt-empty');
+                emptyZone.addEventListener('dragover', e => { e.preventDefault(); emptyZone.style.borderColor = 'var(--primary)'; });
+                emptyZone.addEventListener('dragleave', e => { e.preventDefault(); emptyZone.style.borderColor = 'var(--rp-muted)'; });
+                emptyZone.addEventListener('drop', e => { e.preventDefault(); e.stopPropagation(); if(e.dataTransfer.files.length > 0) App.handleSubUpload(e.dataTransfer.files[0]); });
+                return; 
+            }
+            
+            const frag = document.createDocumentFragment();
+            const bookmarkedIndices = new Set(this.meta.bookmarks.map(b => b.subIndex));
+
+            this.subs.forEach((s, i) => {
+                const li = document.createElement('li'); 
+                li.id = `s-${i}`;
+                
+                // --- Star Column ---
+                const starCol = document.createElement('div');
+                starCol.className = 'star-col';
+                const star = document.createElement('div');
+                star.className = 'star-btn';
+                star.innerHTML = iconSvg('star');
+                star.setAttribute('role', 'button');
+                star.setAttribute('tabindex', '0');
+                star.setAttribute('title', 'Toggle bookmark');
+                star.setAttribute('aria-label', 'Toggle bookmark');
+                if(bookmarkedIndices.has(i)) star.classList.add('filled');
+                star.setAttribute('aria-pressed', bookmarkedIndices.has(i) ? 'true' : 'false');
+                star.onclick = (e) => { e.stopPropagation(); this.toggleBookmark(i, star); };
+                star.onkeydown = (e) => {
+                    if (e.key === 'Enter' || e.key === ' ') {
+                        e.preventDefault();
+                        e.stopPropagation();
+                        this.toggleBookmark(i, star);
+                    }
+                };
+                starCol.appendChild(star);
+                li.appendChild(starCol);
+
+                // --- Text Column ---
+                const txtCol = document.createElement('div');
+                txtCol.className = 'text-container';
+                Furigana.renderSegments(txtCol, s.segments || [{type: "text", text: s.text}]);
+                li.appendChild(txtCol);
+                
+                // Click Behavior: Just Seek
+                li.onclick = () => { 
+                    this.audio.currentTime = s.start + 0.001;
+                };
+                frag.appendChild(li);
+            });
+            this.elSubList.appendChild(frag);
+        },
+        toggleBookmark(index, starEl) {
+            const existsIdx = this.meta.bookmarks.findIndex(b => b.subIndex === index);
+            if(existsIdx > -1) {
+                this.meta.bookmarks.splice(existsIdx, 1);
+                starEl.classList.remove('filled');
+            } else {
+                const s = this.subs[index];
+                this.meta.bookmarks.push({
+                    subIndex: index,
+                    text: s.text,
+                    start: s.start,
+                    end: s.end,
+                    created: Date.now()
+                });
+                starEl.classList.add('filled');
+            }
+            starEl.setAttribute('aria-pressed', starEl.classList.contains('filled') ? 'true' : 'false');
+            this.save();
+        },
+        getChapTime(c) {
+            if (c.start !== undefined) return Number(c.start);
+            if (c.time !== undefined) return Number(c.time);
+            return 0;
+        },
+        renderChapters() {
+            this.elChapList.innerHTML = '';
+            const chaps = this.meta.chapters || [];
+            if (chaps.length === 0) { this.elChapList.innerHTML = '<div class="chap-empty">No Chapters found</div>'; return; }
+            chaps.forEach((c, i) => {
+                const div = document.createElement('div'); div.className = 'chap-item'; div.id = `chap-${i}`;
+                const time = this.getChapTime(c);
+                div.innerHTML = `<span class="chap-time">${Utils.fmtTime(time)}</span> <span class="chap-title" title="${c.title}">${c.title}</span>`;
+                div.onclick = () => { this.audio.currentTime = time; this.audio.play(); };
+                this.elChapList.appendChild(div);
+            });
+        },
+        renderMarkers() {
+            this.elMarkers.innerHTML = '';
+            const dur = this.audio.duration;
+            const chaps = this.meta.chapters || [];
+            if (dur > 0 && chaps.length > 0) {
+                chaps.forEach(c => {
+                    const t = this.getChapTime(c);
+                    if (t > 0) {
+                        const mk = document.createElement('div'); mk.className = 'chap-marker'; mk.style.left = (t / dur * 100) + '%';
+                        this.elMarkers.appendChild(mk);
+                    }
+                });
+            }
+        },
+        activeIndex: -1,
+        centerSubtitleElement(el, behavior = 'smooth') {
+            if (!el) return;
+            const targetTop = el.offsetTop - (this.elSubList.clientHeight - el.offsetHeight) / 2;
+            this.elSubList.scrollTo({ top: Math.max(0, targetTop), behavior });
+        },
+        recenterActiveSubtitle(behavior = 'auto') {
+            if (this.activeIndex < 0) return;
+            this.centerSubtitleElement(document.getElementById(`s-${this.activeIndex}`), behavior);
+        },
+        syncSub() {
+            const t = this.audio.currentTime; let idx = -1;
+            for (let i = 0; i < this.subs.length; i++) { if (t >= this.subs[i].start && t <= this.subs[i].end) { idx = i; break; } }
+            if (idx === -1 && App.settings.fillGap && this.subs.length > 0) {
+                for (let i = 0; i < this.subs.length - 1; i++) {
+                    if (t > this.subs[i].end && t < this.subs[i+1].start) {
+                        const mid = (this.subs[i].end + this.subs[i+1].start) / 2;
+                        if (t < mid) idx = i; else idx = i + 1; break;
+                    }
+                }
+                if (idx === -1 && t > this.subs[this.subs.length-1].end) idx = this.subs.length - 1;
+            }
+            if (idx !== this.activeIndex) {
+                if (this.activeIndex !== -1) document.getElementById(`s-${this.activeIndex}`)?.classList.remove('active');
+                this.activeIndex = idx;
+                if (idx !== -1) {
+                    const el = document.getElementById(`s-${idx}`);
+                    if(el) {
+                        el.classList.add('active');
+                        this.centerSubtitleElement(el);
+                    }
+                    Furigana.renderSegments(this.elFocusText, this.subs[idx].segments);
+                } else {
+                    this.elFocusText.textContent = "...";
+                }
+            }
+        },
+        currentChapIdx: -1,
+        syncChapterActive() {
+            const chaps = this.meta.chapters || []; if(chaps.length === 0) return;
+            const t = this.audio.currentTime; let idx = -1;
+            for(let i=0; i<chaps.length; i++) if(t >= this.getChapTime(chaps[i])) idx = i; else break;
+            if(idx !== this.currentChapIdx) {
+                document.getElementById(`chap-${this.currentChapIdx}`)?.classList.remove('active-chap');
+                this.currentChapIdx = idx;
+                if (idx !== -1) {
+                    const el = document.getElementById(`chap-${idx}`);
+                    if(el) { el.classList.add('active-chap'); if(document.getElementById('chapter-list').classList.contains('open')) el.scrollIntoView({ behavior:'smooth', block:'center' }); }
+                }
+            }
+        },
+        pause() { this.audio.pause(); },
+        togglePlay() { this.audio.paused ? this.audio.play() : this.audio.pause(); },
+        prevSub() {
+            if(this.subs.length > 0) {
+                let target = -1;
+                if (this.activeIndex > -1) target = Math.max(0, this.activeIndex - 1);
+                else { const t = this.audio.currentTime; for(let i=0; i<this.subs.length; i++) if (this.subs[i].end < t) target = i; else break; }
+                if (target > -1) this.audio.currentTime = this.subs[target].start + 0.001;
+            } else { this.audio.currentTime = Math.max(0, this.audio.currentTime - 15); }
+        },
+        nextSub() {
+            if(this.subs.length > 0) {
+                let target = -1;
+                if (this.activeIndex > -1) target = Math.min(this.subs.length - 1, this.activeIndex + 1);
+                else { const t = this.audio.currentTime; for(let i=0; i<this.subs.length; i++) if (this.subs[i].start > t) { target = i; break; } }
+                if (target > -1) this.audio.currentTime = this.subs[target].start + 0.001;
+            } else { this.audio.currentTime = Math.min(this.audio.duration, this.audio.currentTime + 15); }
+        },
+        replaySub() {
+            if(this.subs.length > 0) {
+                if (this.activeIndex > -1) { this.audio.currentTime = this.subs[this.activeIndex].start + 0.001; }
+                else { const t = this.audio.currentTime; let last = -1; for(let i=0; i<this.subs.length; i++) if (this.subs[i].start <= t) last = i; else break; if (last > -1) this.audio.currentTime = this.subs[last].start + 0.001; }
+            } else { this.audio.currentTime = Math.max(0, this.audio.currentTime - 5); }
+        },
+        prevChap() {
+            const chaps = this.meta.chapters || []; if(chaps.length === 0) return;
+            const t = this.audio.currentTime; let idx = -1;
+            for(let i=0; i<chaps.length; i++) if(t >= this.getChapTime(chaps[i])) idx = i; else break; 
+            if (idx === -1) { if (t > 5) { this.audio.currentTime = 0; return; } return; }
+            const currStart = this.getChapTime(chaps[idx]);
+            if (t > currStart + 3) this.audio.currentTime = currStart; 
+            else { if (idx > 0) this.audio.currentTime = this.getChapTime(chaps[idx-1]); else this.audio.currentTime = 0; }
+        },
+        nextChap() {
+            const chaps = this.meta.chapters || []; if(chaps.length === 0) return;
+            const t = this.audio.currentTime; let target = -1;
+            for(let i=0; i<chaps.length; i++) if(this.getChapTime(chaps[i]) > t) { target = i; break; }
+            if (target > -1) this.audio.currentTime = this.getChapTime(chaps[target]);
+        },
+        updateBtn() {
+            const paused = this.audio.paused;
+            this.elBtnPlay.innerHTML = iconSvg(paused ? 'play' : 'pause');
+            this.elBtnPlay.setAttribute('aria-label', paused ? 'Play' : 'Pause');
+            this.elBtnPlay.setAttribute('title', `${paused ? 'Play' : 'Pause'} (Space)`);
+        },
+        save() { if (!this.meta) return; this.meta.progress = this.audio.currentTime; this.meta.lastPlayed = Date.now(); DB.saveMetadata(this.meta); },
+        isSeeking: false
+    };
+    
+    const seekBar = document.getElementById('seek-bar');
+    const seekFill = document.getElementById('seek-fill');
+    seekBar.addEventListener('mousedown', () => Player.isSeeking = true);
+    seekBar.addEventListener('touchstart', () => Player.isSeeking = true);
+    seekBar.addEventListener('change', (e) => { Player.audio.currentTime = e.target.value; Player.isSeeking = false; if(Player.audio.duration) seekFill.style.width = (Player.audio.currentTime / Player.audio.duration * 100) + "%"; });
+    seekBar.addEventListener('input', (e) => { document.getElementById('t-curr').textContent = Utils.fmtTime(e.target.value); if(Player.audio.duration) seekFill.style.width = (e.target.value / Player.audio.duration * 100) + "%"; });
+    let resizeRecenterTimer;
+    window.addEventListener('resize', () => {
+        clearTimeout(resizeRecenterTimer);
+        resizeRecenterTimer = setTimeout(() => Player.recenterActiveSubtitle('auto'), 100);
+    });
+    
+    const focusView = document.getElementById('view-focus');
+    let longPressTimer;
+    const startFocusAction = () => { longPressTimer = setTimeout(() => App.toggleFocusMode(), 1000); };
+    const endFocusAction = () => clearTimeout(longPressTimer);
+    focusView.addEventListener('mousedown', startFocusAction); focusView.addEventListener('mouseup', endFocusAction);
+    focusView.addEventListener('touchstart', startFocusAction); focusView.addEventListener('touchend', endFocusAction);
+    focusView.addEventListener('click', (e) => {
+        if (window.getSelection().toString().length > 0) return;
+        const w = window.innerWidth; const x = e.clientX;
+        if (x > w * 0.3 && x < w * 0.7) Player.togglePlay(); else if (x < w * 0.3) Player.prevSub(); else Player.nextSub();
+    });
+    document.addEventListener('fullscreenchange', () => { if (!document.fullscreenElement && !focusView.classList.contains('hidden')) focusView.classList.add('hidden'); });
+    
+    const Input = {
+        btns: {}, 
+        init() {
+            document.addEventListener('keydown', e => {
+                if (document.getElementById('view-player').classList.contains('hidden')) return;
+                const k = e.code;
+                if(k==='Space' || k==='KeyW') { e.preventDefault(); Player.togglePlay(); }
+                else if(k==='KeyA' || k==='ArrowLeft') Player.prevSub();
+                else if(k==='KeyD' || k==='ArrowRight') Player.nextSub();
+                else if(k==='KeyS' || k==='ArrowDown') { e.preventDefault(); Player.replaySub(); }
+                else if(k==='KeyQ' || k==='PageUp') Player.prevChap();
+                else if(k==='KeyE' || k==='PageDown') Player.nextChap();
+                else if(k==='KeyF') App.toggleFocusMode();
+                else if(k==='Escape' && !document.getElementById('view-focus').classList.contains('hidden')) { App.toggleFocusMode(); }
+            });
+            window.addEventListener("gamepadconnected", () => requestAnimationFrame(this.poll.bind(this)));
+        },
+        poll() {
+            const gp = navigator.getGamepads()[0];
+            if (gp) {
+                this.checkBtn(gp, 0, () => Player.togglePlay()); this.checkBtn(gp, 3, () => App.toggleFocusMode());
+                this.checkBtn(gp, 14, () => Player.prevSub()); this.checkBtn(gp, 15, () => Player.nextSub());
+                this.checkBtn(gp, 13, () => Player.replaySub()); this.checkBtn(gp, 4, () => Player.prevChap());
+                this.checkBtn(gp, 5, () => Player.nextChap()); this.checkBtn(gp, 7, () => Player.nextChap());
+                const axisX = gp.axes[0], axisY = gp.axes[1];
+                if (axisX < -0.5) this.triggerAxis('axLeft', () => Player.prevSub()); else if (axisX > 0.5) this.triggerAxis('axRight', () => Player.nextSub()); else { this.btns['axLeft'] = false; this.btns['axRight'] = false; }
+                if (axisY > 0.5) this.triggerAxis('axDown', () => Player.replaySub()); else this.btns['axDown'] = false;
+            }
+            requestAnimationFrame(this.poll.bind(this));
+        },
+        checkBtn(gp, idx, cb) { if (gp.buttons[idx] && gp.buttons[idx].pressed) { if (!this.btns[idx]) { this.btns[idx] = true; cb(); } } else { this.btns[idx] = false; } },
+        triggerAxis(key, cb) { if (!this.btns[key]) { this.btns[key] = true; cb(); } }
+    };
+
+    const Furigana = {
+        displayMode: 'always',
+        rubySize: 50,
+        apiEndpoint: window.location.origin,
+        isGenerating: false,
+        abortController: null,
+        activeEditSeg: null,
+        activeEditRubyEl: null,
+
+        init() {
+            const savedMode = localStorage.getItem('ky_furi_mode');
+            const legacyHidden = localStorage.getItem('ky_furi_visible') === "false";
+            this.displayMode = savedMode === 'hover' || (!savedMode && legacyHidden) ? 'hover' : 'always';
+            this.rubySize = Math.min(80, Math.max(30, parseInt(localStorage.getItem('ky_furi_size') || "50") || 50));
+            this.apiEndpoint = localStorage.getItem('ky_furi_api') || window.location.origin;
+
+            document.getElementById('opt-ruby-size').value = this.rubySize;
+            document.getElementById('ruby-size-value').textContent = `${this.rubySize}%`;
+            const apiEl = document.getElementById('opt-api-endpoint');
+            if (apiEl) apiEl.value = this.apiEndpoint;
+
+            this.applyRubyDisplayMode();
+            this.applyRubySize();
+        },
+
+        saveApiEndpoint() {
+            const configured = document.getElementById('opt-api-endpoint').value.trim();
+            this.apiEndpoint = (configured || window.location.origin).replace(/\/$/, '');
+            localStorage.setItem('ky_furi_api', configured);
+            this.checkBackendStatus();
+        },
+
+        setDisplayMode(mode) {
+            this.displayMode = mode === 'hover' ? 'hover' : 'always';
+            localStorage.setItem('ky_furi_mode', this.displayMode);
+            this.applyRubyDisplayMode();
+        },
+
+        applyRubyDisplayMode() {
+            const subList = document.getElementById('sub-list');
+            const focusText = document.getElementById('focus-text');
+            const hoverOnly = this.displayMode === 'hover';
+            const normalizedMode = hoverOnly ? 'hover' : 'always';
+            [subList, focusText].forEach((target) => {
+                target.classList.remove('furigana-hover', 'hide-furigana');
+                target.dataset.furiganaMode = normalizedMode;
+            });
+            document.getElementById('btn-furigana-always').setAttribute('aria-pressed', String(!hoverOnly));
+            document.getElementById('btn-furigana-hover').setAttribute('aria-pressed', String(hoverOnly));
+        },
+
+        applyRubySize() {
+            const input = document.getElementById('opt-ruby-size');
+            this.rubySize = Math.min(80, Math.max(30, parseInt(input.value) || 50));
+            input.value = this.rubySize;
+            const progress = ((this.rubySize - 30) / (80 - 30)) * 100;
+            input.style.setProperty('--slider-progress', `${progress}%`);
+            localStorage.setItem('ky_furi_size', this.rubySize);
+            document.documentElement.style.setProperty('--ruby-size', (this.rubySize / 100) + 'em');
+            document.getElementById('ruby-size-value').textContent = `${this.rubySize}%`;
+        },
+
+        isKanjiCharacter(character) {
+            return /[一-龠々〆ヶ]/.test(character);
+        },
+
+        isKanaCharacter(character) {
+            return /[ぁ-ゖゝゞァ-ヺヽヾー]/.test(character);
+        },
+
+        toHiragana(text) {
+            return Array.from(text || "").map(character => {
+                if (character >= "ァ" && character <= "ヶ") {
+                    return String.fromCharCode(character.charCodeAt(0) - 0x60);
+                }
+                return character;
+            }).join("");
+        },
+
+        surfaceRuns(surface) {
+            const runs = [];
+            Array.from(surface || "").forEach(character => {
+                const kind = this.isKanjiCharacter(character)
+                    ? "kanji"
+                    : (this.isKanaCharacter(character) ? "kana" : "other");
+                const previous = runs[runs.length - 1];
+                if (previous && previous.kind === kind) {
+                    previous.text += character;
+                } else {
+                    runs.push({ kind, text: character });
+                }
+            });
+            return runs;
+        },
+
+        splitRubySegment(segment) {
+            if (
+                !segment
+                || segment.type !== "ruby"
+                || !segment.base
+                || !segment.reading
+                || !Array.from(segment.base).some(character => this.isKanjiCharacter(character))
+            ) {
+                return [segment];
+            }
+
+            const normalizedReading = this.toHiragana(segment.reading);
+            const parts = [];
+            const pendingKanjiIndices = [];
+            let readingCursor = 0;
+
+            for (const run of this.surfaceRuns(segment.base)) {
+                if (run.kind === "kanji") {
+                    parts.push({ ...segment, base: run.text, reading: null });
+                    pendingKanjiIndices.push(parts.length - 1);
+                    continue;
+                }
+                if (run.kind === "other") {
+                    parts.push({ type: "text", text: run.text });
+                    continue;
+                }
+
+                const anchor = this.toHiragana(run.text);
+                const searchFrom = readingCursor + (pendingKanjiIndices.length > 0 ? 1 : 0);
+                const anchorStart = normalizedReading.indexOf(anchor, searchFrom);
+                if (anchorStart < 0) return [segment];
+
+                const readingBeforeAnchor = segment.reading.slice(readingCursor, anchorStart);
+                if (pendingKanjiIndices.length > 0) {
+                    if (pendingKanjiIndices.length !== 1 || !readingBeforeAnchor) return [segment];
+                    const partIndex = pendingKanjiIndices.pop();
+                    parts[partIndex] = { ...parts[partIndex], reading: readingBeforeAnchor };
+                } else if (readingBeforeAnchor) {
+                    return [segment];
+                }
+
+                parts.push({ type: "text", text: run.text });
+                readingCursor = anchorStart + anchor.length;
+            }
+
+            const remainingReading = segment.reading.slice(readingCursor);
+            if (pendingKanjiIndices.length > 0) {
+                if (pendingKanjiIndices.length !== 1 || !remainingReading) return [segment];
+                const partIndex = pendingKanjiIndices.pop();
+                parts[partIndex] = { ...parts[partIndex], reading: remainingReading };
+            } else if (remainingReading) {
+                return [segment];
+            }
+
+            if (parts.some(part => part.type === "ruby" && !part.reading)) return [segment];
+            if (
+                parts.length === 1
+                && parts[0].type === "ruby"
+                && parts[0].base === segment.base
+                && parts[0].reading === segment.reading
+            ) {
+                return [segment];
+            }
+            return parts;
+        },
+
+        normalizeSegments(segments) {
+            const normalized = [];
+            const append = (segment) => {
+                if (!segment) return;
+                if (segment.type === "ruby" && !segment.reading) {
+                    segment = { type: "text", text: segment.base || "" };
+                }
+                if (!((segment.type === "text" ? segment.text : segment.base) || "")) return;
+                const previous = normalized[normalized.length - 1];
+                if (previous?.type === "text" && segment.type === "text") {
+                    normalized[normalized.length - 1] = {
+                        type: "text",
+                        text: previous.text + segment.text
+                    };
+                } else {
+                    normalized.push(segment);
+                }
+            };
+
+            (segments || []).forEach(segment => {
+                const parts = segment.type === "ruby"
+                    ? this.splitRubySegment(segment)
+                    : [segment];
+                parts.forEach(append);
+            });
+            return normalized;
+        },
+
+        async checkBackendStatus() {
+            const statusEl = document.getElementById('gen-status');
+            const statusText = document.getElementById('gen-status-text');
+            if (!statusEl || !statusText) return;
+            const setStatus = (text, state = '') => {
+                statusText.textContent = text;
+                statusEl.classList.remove('ready', 'error');
+                if (state) statusEl.classList.add(state);
+            };
+            try {
+                const res = await fetch(`${this.apiEndpoint}/api/ready`);
+                if (res.ok) {
+                    const data = await res.json();
+                    if (data.ready) {
+                        setStatus("Backend ready", "ready");
+                    } else {
+                        setStatus("Backend error", "error");
+                    }
+                } else {
+                    setStatus("Backend offline");
+                }
+            } catch(e) {
+                setStatus("Backend offline");
+            }
+        },
+
+        parseRubySrtMarkup(text) {
+            const parser = new DOMParser();
+            const doc = parser.parseFromString(`<body>${text}</body>`, 'text/html');
+            const body = doc.body;
+            const segments = [];
+            const nodes = Array.from(body.childNodes);
+            nodes.forEach(node => {
+                if (node.nodeType === Node.TEXT_NODE) {
+                    if (node.textContent) {
+                        segments.push({ type: "text", text: node.textContent });
+                    }
+                } else if (node.nodeType === Node.ELEMENT_NODE) {
+                    const tagName = node.tagName.toLowerCase();
+                    if (tagName === "ruby") {
+                        const baseText = node.firstChild ? (node.firstChild.nodeType === Node.TEXT_NODE ? node.firstChild.textContent : "") : "";
+                        const rtEl = node.querySelector("rt");
+                        const reading = rtEl ? rtEl.textContent : "";
+                        if (baseText || reading) {
+                            segments.push({
+                                type: "ruby",
+                                base: baseText,
+                                reading: reading,
+                                source: "PlainText",
+                                confidence: null,
+                                edited: false
+                            });
+                        }
+                    } else {
+                        if (node.textContent) {
+                            segments.push({ type: "text", text: node.textContent });
+                        }
+                    }
+                }
+            });
+            if (segments.length === 0 && text) {
+                segments.push({ type: "text", text: text.replace(/<[^>]+>/g, "") });
+            }
+            return this.normalizeSegments(segments);
+        },
+
+        stripRubyMarkup(text) {
+            const parser = new DOMParser();
+            const doc = parser.parseFromString(`<body>${text}</body>`, 'text/html');
+            let plain = "";
+            doc.body.childNodes.forEach(node => {
+                if (node.nodeType === Node.TEXT_NODE) {
+                    plain += node.textContent;
+                } else if (node.nodeType === Node.ELEMENT_NODE) {
+                    const tagName = node.tagName.toLowerCase();
+                    if (tagName === "ruby") {
+                        if (node.firstChild && node.firstChild.nodeType === Node.TEXT_NODE) {
+                            plain += node.firstChild.textContent;
+                        }
+                    } else {
+                        plain += node.textContent;
+                    }
+                }
+            });
+            return plain;
+        },
+
+        sanitizeText(text) {
+            return text.replace(/<[^>]+>/g, "");
+        },
+
+        renderSegments(container, segments) {
+            container.innerHTML = "";
+            segments.forEach(seg => {
+                if (seg.type === "text") {
+                    container.appendChild(document.createTextNode(seg.text));
+                } else if (seg.type === "ruby") {
+                    const ruby = document.createElement("ruby");
+                    ruby.className = "ruby-segment";
+                    ruby.tabIndex = 0;
+                    ruby.setAttribute('role', 'button');
+                    ruby.setAttribute('aria-label', `${seg.base}, reading ${seg.reading}. Edit reading`);
+                    const baseText = document.createTextNode(seg.base);
+                    const rt = document.createElement("rt");
+                    rt.textContent = seg.reading;
+                    if (seg.edited) {
+                        rt.classList.add('edited');
+                    }
+                    ruby.appendChild(baseText);
+                    ruby.appendChild(rt);
+                    ruby.onclick = (e) => {
+                        e.stopPropagation();
+                        Furigana.openEditRuby(seg, ruby);
+                    };
+                    ruby.onkeydown = (e) => {
+                        if (e.key === 'Enter' || e.key === ' ') {
+                            e.preventDefault();
+                            e.stopPropagation();
+                            Furigana.openEditRuby(seg, ruby);
+                        }
+                    };
+                    container.appendChild(ruby);
+                }
+            });
+        },
+
+        async parseJsonSubs(file) {
+            const text = await file.text();
+            const data = JSON.parse(text);
+            if (data.schema_version !== 1 || !Array.isArray(data.cues)) {
+                throw new Error("Invalid schema");
+            }
+            return data.cues.map(c => {
+                const startSec = c.start_ms / 1000;
+                const endSec = c.end_ms / 1000;
+                return {
+                    cue_id: c.cue_id,
+                    start_ms: c.start_ms,
+                    end_ms: c.end_ms,
+                    plain_text: c.plain_text,
+                    segments: this.normalizeSegments(c.segments),
+                    start: startSec,
+                    end: endSec,
+                    text: c.plain_text
+                };
+            });
+        },
+
+        async generate() {
+            if (!App.currentBook || !Player.subs || Player.subs.length === 0) {
+                return alert("Load subtitles before generating furigana.");
+            }
+            if (this.isGenerating) return;
+
+            this.isGenerating = true;
+            this.abortController = new AbortController();
+
+            document.getElementById('btn-gen-furigana').classList.add('hidden');
+            document.getElementById('btn-cancel-gen').classList.remove('hidden');
+            const progressRow = document.getElementById('gen-progress-row');
+            progressRow.classList.remove('hidden');
+
+            const cues = Player.subs;
+            const batchSize = 16;
+            const total = cues.length;
+            let processed = 0;
+
+            const updateProgress = (pct) => {
+                document.getElementById('gen-progress-fill').style.width = pct + "%";
+                document.getElementById('gen-progress-text').textContent = Math.round(pct) + "%";
+            };
+
+            const fetchWithRetry = async (url, options, retries = 3, delay = 1000) => {
+                try {
+                    const response = await fetch(url, options);
+                    if (!response.ok) {
+                        throw new Error(`API error: ${response.status}`);
+                    }
+                    return response;
+                } catch (err) {
+                    if (retries > 0 && !options.signal?.aborted) {
+                        console.warn(`Request failed. Retrying in ${delay} ms (${retries} retries left).`);
+                        await new Promise(resolve => setTimeout(resolve, delay));
+                        return fetchWithRetry(url, options, retries - 1, delay * 2);
+                    }
+                    throw err;
+                }
+            };
+
+            updateProgress(0);
+
+            try {
+                for (let i = 0; i < total; i += batchSize) {
+                    if (this.abortController.signal.aborted) {
+                        throw new Error("Aborted");
+                    }
+                    const chunk = cues.slice(i, i + batchSize);
+                    const payloadCues = chunk.map(c => ({
+                        cue_id: c.cue_id,
+                        start_ms: c.start_ms,
+                        end_ms: c.end_ms,
+                        text: c.plain_text
+                    }));
+                    const response = await fetchWithRetry(`${this.apiEndpoint}/api/furigana/generate-batch`, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({
+                            request_id: `req-${Date.now()}-${i}`,
+                            cues: payloadCues
+                        }),
+                        signal: this.abortController.signal
+                    });
+                    const data = await response.json();
+                    data.cues.forEach((rc, rIdx) => {
+                        const localIdx = i + rIdx;
+                        if (localIdx < cues.length) {
+                            cues[localIdx].segments = this.normalizeSegments(rc.segments);
+                        }
+                    });
+                    processed += chunk.length;
+                    updateProgress((processed / total) * 100);
+                }
+                await DB.saveMetadata(App.currentBook);
+                Player.renderSubs();
+                Player.syncSub();
+                alert("Furigana generation complete.");
+            } catch(e) {
+                if (e.message !== "Aborted") {
+                    console.error(e);
+                    alert(`Furigana generation failed: ${e.message}`);
+                } else {
+                    alert("Furigana generation cancelled.");
+                }
+            } finally {
+                this.isGenerating = false;
+                this.abortController = null;
+                document.getElementById('btn-gen-furigana').classList.remove('hidden');
+                document.getElementById('btn-cancel-gen').classList.add('hidden');
+                progressRow.classList.add('hidden');
+            }
+        },
+
+        cancel() {
+            if (this.abortController) {
+                this.abortController.abort();
+            }
+        },
+
+        openEditRuby(seg, rubyEl) {
+            this.activeEditSeg = seg;
+            this.activeEditRubyEl = rubyEl;
+            document.getElementById('edit-ruby-base').textContent = seg.base;
+            document.getElementById('edit-ruby-input').value = seg.reading;
+            App.toggleModal('modal-edit-ruby');
+            document.getElementById('edit-ruby-input').focus();
+        },
+
+        saveRubyEdit() {
+            if (!this.activeEditSeg || !this.activeEditRubyEl) return;
+            const newReading = document.getElementById('edit-ruby-input').value.trim();
+            if (!newReading) return alert("Enter a reading before saving.");
+            this.activeEditSeg.reading = newReading;
+            this.activeEditSeg.edited = true;
+            this.activeEditSeg.source = "ManualEdit";
+            const rt = this.activeEditRubyEl.querySelector('rt');
+            if (rt) {
+                rt.textContent = newReading;
+                rt.classList.add('edited');
+            }
+            DB.saveMetadata(App.currentBook);
+            App.toggleModal('modal-edit-ruby');
+            this.activeEditSeg = null;
+            this.activeEditRubyEl = null;
+            Player.syncSub();
+        },
+
+        resetRubyEdit() {
+            if (!this.activeEditSeg || !this.activeEditRubyEl) return;
+            this.activeEditSeg.reading = "";
+            this.activeEditSeg.edited = false;
+            this.activeEditSeg.source = "PlainText";
+            DB.saveMetadata(App.currentBook);
+            App.toggleModal('modal-edit-ruby');
+            Player.renderSubs();
+            Player.syncSub();
+            this.activeEditSeg = null;
+            this.activeEditRubyEl = null;
+        },
+
+        exportJson() {
+            if (!App.currentBook || !Player.subs || Player.subs.length === 0) return alert("There are no subtitles to export.");
+            const cleanCues = Player.subs.map(s => ({
+                cue_id: s.cue_id,
+                start_ms: s.start_ms,
+                end_ms: s.end_ms,
+                plain_text: s.plain_text,
+                segments: this.normalizeSegments(s.segments).map(seg => {
+                    if (seg.type === "text") {
+                        return { type: "text", text: seg.text };
+                    } else {
+                        return {
+                            type: "ruby",
+                            base: seg.base,
+                            reading: seg.reading,
+                            source: seg.source,
+                            confidence: seg.confidence,
+                            edited: seg.edited
+                        };
+                    }
+                })
+            }));
+            const payload = {
+                schema_version: 1,
+                model_id: App.currentBook.model_id || "local-furigana-aid-bert-mlp",
+                model_revision: App.currentBook.model_revision || null,
+                cues: cleanCues
+            };
+            const jsonContent = JSON.stringify(payload, null, 2);
+            const blob = new Blob([jsonContent], { type: 'application/json;charset=utf-8;' });
+            const url = URL.createObjectURL(blob);
+            const link = document.createElement("a");
+            link.setAttribute("href", url);
+            link.setAttribute("download", `${App.currentBook.title}.furigana.json`);
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+        },
+
+        exportSrt() {
+            if (!App.currentBook || !Player.subs || Player.subs.length === 0) return alert("There are no subtitles to export.");
+            const convertMsToSrtTime = (ms) => {
+                const h = Math.floor(ms / 3600000).toString().padStart(2, '0');
+                const m = Math.floor((ms % 3600000) / 60000).toString().padStart(2, '0');
+                const s = Math.floor((ms % 60000) / 1000).toString().padStart(2, '0');
+                const mss = Math.floor(ms % 1000).toString().padStart(3, '0');
+                return `${h}:${m}:${s},${mss}`;
+            };
+            const rows = Player.subs.map((s, idx) => {
+                const srtText = this.normalizeSegments(s.segments).map(seg => {
+                    if (seg.type === "text") {
+                        return seg.text;
+                    } else {
+                        return `<ruby>${seg.base}<rt>${seg.reading}</rt></ruby>`;
+                    }
+                }).join("");
+                return `${idx + 1}\n${convertMsToSrtTime(s.start_ms)} --> ${convertMsToSrtTime(s.end_ms)}\n${srtText}`;
+            });
+            const srtContent = rows.join("\n\n") + "\n";
+            const blob = new Blob([srtContent], { type: 'text/srt;charset=utf-8;' });
+            const url = URL.createObjectURL(blob);
+            const link = document.createElement("a");
+            link.setAttribute("href", url);
+            link.setAttribute("download", `${App.currentBook.title}.furigana.srt`);
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+        }
+    };
+
+    App.init();
+    </script>
+    </body>
+    </html>
