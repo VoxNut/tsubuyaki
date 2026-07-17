@@ -1,3 +1,18 @@
+---
+title: Furigana Aid Reader
+emoji: 🎧
+colorFrom: purple
+colorTo: blue
+sdk: docker
+app_port: 7860
+license: gpl-3.0
+models:
+  - voxnuts947/furigana-aid-model
+datasets:
+  - Calvin-Xu/Furigana-Aozora
+short_description: Context-aware Japanese furigana generation with BERT, MLP, and MeCab.
+---
+
 # Furigana Aid Reader
 
 Backend Phase 1 for a context-aware Japanese Furigana reader. The service
@@ -53,7 +68,7 @@ Run:
 
 ```powershell
 $env:PYTHONPATH = "backend\src"
-.\.venv\Scripts\python.exe -m uvicorn furigana_aid.api.main:app `
+.\.venv\Scripts\python.exe -m uvicorn furigana_aid.main:app `
   --host 127.0.0.1 --port 7860
 ```
 
@@ -70,6 +85,10 @@ API endpoints:
 - `GET /api/ready`
 - `GET /api/version`
 - `POST /api/furigana/generate-batch`
+
+The Docker image exposes the API on port `7860`. Model weights are downloaded
+at container startup from the configured immutable Hub revision; they are not
+baked into the image or committed to this repository.
 
 See [Phase 1 notes](docs/PHASE1.md), [architecture](docs/ARCHITECTURE.md),
 [security](docs/SECURITY.md), and [model limitations](docs/MODEL_LIMITATIONS.md).

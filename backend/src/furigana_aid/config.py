@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import re
 from pathlib import Path
 from typing import Literal
 
@@ -52,6 +53,19 @@ class Settings(BaseSettings):
         if isinstance(value, str) and not value.strip():
             return None
         return value
+
+    @field_validator("hf_model_revision")
+    @classmethod
+    def validate_immutable_hf_revision(cls, value: str | None) -> str | None:
+        if value is None:
+            return None
+        normalized = value.strip()
+        if re.fullmatch(r"[0-9a-fA-F]{40}", normalized) is None:
+            raise ValueError(
+                "FURIGANA_HF_MODEL_REVISION phải là commit SHA 40 ký tự, "
+                "không dùng branch hoặc tag có thể thay đổi."
+            )
+        return normalized.lower()
 
     @field_validator("model_local_dir", mode="before")
     @classmethod

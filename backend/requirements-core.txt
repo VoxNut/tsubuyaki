@@ -1,0 +1,12 @@
+# Runtime dependencies shared by the CPU and CUDA container images.
+# PyTorch is installed separately from the hardware-specific official index.
+fastapi==0.139.2
+fugashi==1.5.2
+huggingface-hub==0.36.2
+numpy==2.5.1
+psutil==7.2.2
+pydantic-settings==2.14.2
+safetensors==0.8.0
+transformers==4.57.6
+unidic-lite==1.0.8
+uvicorn==0.51.0

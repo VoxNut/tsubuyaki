@@ -4,7 +4,8 @@ This document provides detailed instructions on how to package the backend servi
 
 ## 1. Prerequisites
 - Docker and Docker Compose (if running local containers)
-- A Hugging Face account and a Write Access Token
+- A Hugging Face account; use a local write token for uploads and a separate
+  read-only token for the Space
 - Python 3.12+ (for running the upload script)
 
 ---
@@ -26,7 +27,7 @@ To allow the backend to automatically retrieve model files at runtime while keep
 2. **Run Upload Script:**
    Execute `scripts/hf_upload.py` to create a private repository and push the local `model/` folder contents:
    ```bash
-   python scripts/hf_upload.py --repo_id "username/furigana-aid-model" --model_dir "/path/to/your/model"
+   python scripts/hf_upload.py --repo-id "username/furigana-aid-model" --model-dir "/path/to/your/model"
    ```
    *Note: Replace `username/furigana-aid-model` with your Hugging Face username and desired repository name.*
 
@@ -47,7 +48,7 @@ You can test the backend container locally before deploying to the cloud:
    docker run -d -p 8000:7860 \
      -e FURIGANA_MODEL_LOCAL_DIR="" \
      -e FURIGANA_HF_MODEL_REPO="username/furigana-aid-model" \
-     -e FURIGANA_HF_MODEL_REVISION="main" \
+     -e FURIGANA_HF_MODEL_REVISION="<model-commit-sha>" \
      -e HF_TOKEN="your_token_here" \
      furigana-aid-backend
    ```
@@ -72,8 +73,11 @@ Hugging Face Spaces provides a free CPU tier for running custom Docker container
 3. **Configure Environment Variables:**
    Under Settings, add the following variables:
    - `FURIGANA_HF_MODEL_REPO` = `username/furigana-aid-model`
-   - `FURIGANA_HF_MODEL_REVISION` = `main`
+   - `FURIGANA_HF_MODEL_REVISION` = the immutable commit SHA printed by the upload script
    - `PORT` = `7860`
+
+   Do not use the model's `main` branch as a production revision because it can
+   change between container starts.
 
 4. **Push Code:**
    - Clone the Space's Git repository.

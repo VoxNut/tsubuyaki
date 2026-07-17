@@ -23,7 +23,7 @@ dependencies = [
   "torch==2.13.0",
   "transformers==4.57.6",
   "unidic-lite==1.0.8",
-  "uvicorn[standard]==0.51.0",
+  "uvicorn==0.51.0",
 ]
 
 [tool.setuptools]
