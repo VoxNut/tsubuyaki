@@ -1,10 +1,10 @@
 ---
 title: tsubuyaki
-emoji: 🎧
 colorFrom: purple
 colorTo: blue
 sdk: docker
 app_port: 7860
+fullWidth: true
 license: gpl-3.0
 models:
   - voxnuts947/furigana-aid-model

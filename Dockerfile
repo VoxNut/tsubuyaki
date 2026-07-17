@@ -19,8 +19,8 @@ ENV PYTHONDONTWRITEBYTECODE=1 \
 
 WORKDIR /app
 
-RUN groupadd --system app \
-    && useradd --system --gid app --create-home app
+RUN groupadd --gid 1000 app \
+    && useradd --uid 1000 --gid app --create-home --shell /usr/sbin/nologin app
 
 COPY backend/requirements-core.txt /tmp/requirements-core.txt
 RUN --mount=type=cache,target=/root/.cache/pip,sharing=locked \

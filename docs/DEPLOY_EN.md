@@ -56,24 +56,33 @@ You can test the backend container locally before deploying to the cloud:
 
 ---
 
-## 4. Deploy to Hugging Face Spaces (Recommended - Free CPU Tier)
+## 4. Deploy the frontend and backend to Hugging Face Spaces
 
-Hugging Face Spaces provides a free CPU tier for running custom Docker containers.
+The project Docker image serves both the web UI and FastAPI API on port `7860`.
+This is the recommended deployment because users visit one URL and the browser
+does not cross an origin boundary between the frontend and backend.
 
 1. **Create Space:**
    - Go to Hugging Face Spaces and click **Create a new Space**.
    - Pick a name, select **Docker** as the SDK, and choose the **Blank** template.
-   - Choose public or private visibility depending on your preferences.
+   - Choose **Public** to make both the app and source code publicly accessible.
+   - Hugging Face PRO users can choose **Protected** to keep source code private
+     while the running application remains public.
 
 2. **Configure Secrets:**
    Under **Settings -> Variables and secrets** in your Space, add a new secret:
    - Name: `HF_TOKEN`
-   - Value: *Your Hugging Face Token (needs read permission to download private models)*
+   - Value: *A dedicated read-only token allowed to download the private model.*
+
+   Do not use a personal write token as a long-lived runtime secret, and never
+   place a token in the README, source code, or Docker image.
 
 3. **Configure Environment Variables:**
    Under Settings, add the following variables:
    - `FURIGANA_HF_MODEL_REPO` = `username/furigana-aid-model`
    - `FURIGANA_HF_MODEL_REVISION` = the immutable commit SHA printed by the upload script
+   - `FURIGANA_DEVICE` = `cpu`
+   - `FURIGANA_INFERENCE_BATCH_SIZE` = `8`
    - `PORT` = `7860`
 
    Do not use the model's `main` branch as a production revision because it can
@@ -84,19 +93,25 @@ Hugging Face Spaces provides a free CPU tier for running custom Docker container
    - Copy all source files from `tsubuyaki` (including `Dockerfile`, `backend/`, `frontend/`) into the Space directory.
    - Commit and push to the Space's `main` branch. The Space will build and boot up automatically.
 
+5. **Verify the deployment:**
+   - `https://<space-subdomain>.hf.space/api/health` must return `{"status":"ok"}`.
+   - `https://<space-subdomain>.hf.space/api/ready` must return `"ready": true`.
+   - Open `https://<space-subdomain>.hf.space/` to use the web application.
+
 ---
 
-## 5. Deploy Frontend
+## 5. When should the frontend be deployed separately?
 
-The Frontend is a static page located inside the `frontend/` folder.
+The frontend does not need a separate deployment by default. FastAPI mounts
+`frontend/` at `/`, while the API is available at `/api/` on the same domain.
 
-- **Local Development:**
-  Open `frontend/index.html` directly in a browser or spin up a simple web server:
+- **Separate local frontend development:**
   ```bash
   cd frontend
   python -m http.server 8080
   ```
-- **Cloud Hosting:**
-  Since the frontend consists only of static files (`index.html`, `manifest.json`, `service-worker.js`), you can host it for free on GitHub Pages, Vercel, Netlify, Cloudflare Pages, etc.
-- **Connection Configuration:**
-  Once opened, click the **Settings (⚙)** icon on the player UI, enter your backend API URL (e.g., `https://username-space-name.hf.space`) in the **API Server Endpoint** box, and click **Tạo Furigana** to process subtitles!
+- When hosting the frontend on GitHub Pages, Vercel, Netlify, or Cloudflare
+  Pages, enter the backend URL under **Settings -> API Server Endpoint** and add
+  the frontend domain to the backend's `FURIGANA_CORS_ORIGINS` variable.
+- With the default Docker Space, leave **API Server Endpoint** blank so the app
+  calls `/api` on the same origin, then select **Generate furigana**.
