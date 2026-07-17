@@ -54,7 +54,9 @@ def test_furigana_display_mode_supports_always_and_hover() -> None:
     assert ">On hover</button>" in html
     assert "setDisplayMode('always')" in html
     assert "setDisplayMode('hover')" in html
-    assert ".furigana-hover ruby rt" in html
+    assert '#sub-list[data-furigana-mode="always"] ruby rt' in html
+    assert '#sub-list[data-furigana-mode="hover"] ruby rt' in html
+    assert "target.dataset.furiganaMode = normalizedMode" in html
     assert "localStorage.setItem('ky_furi_mode'" in html
 
 
@@ -101,9 +103,9 @@ def test_pwa_brand_and_cache_are_updated() -> None:
 
     assert '"name": "tsubuyaki"' in manifest
     assert '"theme_color": "#191724"' in manifest
-    assert "tsubuyaki-v3" in service_worker
-    assert '"src": "regular-icon.png?v=3"' in manifest
-    assert '"src": "maskable-icon.png?v=3"' in manifest
+    assert "tsubuyaki-v4" in service_worker
+    assert '"src": "regular-icon.png?v=4"' in manifest
+    assert '"src": "maskable-icon.png?v=4"' in manifest
     assert "fetch(e.request)" in service_worker
 
 

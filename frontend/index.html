@@ -5,9 +5,9 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <meta name="theme-color" content="#191724">
     <title>tsubuyaki</title>
-    <link rel="icon" type="image/png" href="regular-icon.png?v=3">
-    <link rel="apple-touch-icon" href="regular-icon.png?v=3">
-    <link rel="manifest" href="manifest.json?v=3">
+    <link rel="icon" type="image/png" href="regular-icon.png?v=4">
+    <link rel="apple-touch-icon" href="regular-icon.png?v=4">
+    <link rel="manifest" href="manifest.json?v=4">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <style>
@@ -344,10 +344,27 @@
         rt.edited {
             color: var(--warn);
         }
-        .furigana-hover ruby rt { visibility: hidden; opacity: 0; transition: opacity 0.14s ease, color 0.14s ease; }
-        .furigana-hover ruby:hover rt,
-        .furigana-hover ruby:focus rt,
-        .furigana-hover ruby:focus-within rt { visibility: visible; opacity: 1; }
+        #sub-list[data-furigana-mode="always"] ruby rt,
+        #focus-text[data-furigana-mode="always"] ruby rt {
+            display: ruby-text !important;
+            visibility: visible !important;
+            opacity: 1 !important;
+        }
+        #sub-list[data-furigana-mode="hover"] ruby rt,
+        #focus-text[data-furigana-mode="hover"] ruby rt {
+            visibility: hidden !important;
+            opacity: 0 !important;
+            transition: opacity 0.14s ease, color 0.14s ease;
+        }
+        #sub-list[data-furigana-mode="hover"] ruby:hover rt,
+        #sub-list[data-furigana-mode="hover"] ruby:focus rt,
+        #sub-list[data-furigana-mode="hover"] ruby:focus-within rt,
+        #focus-text[data-furigana-mode="hover"] ruby:hover rt,
+        #focus-text[data-furigana-mode="hover"] ruby:focus rt,
+        #focus-text[data-furigana-mode="hover"] ruby:focus-within rt {
+            visibility: visible !important;
+            opacity: 1 !important;
+        }
         .ruby-segment {
             cursor: pointer;
             border-bottom: 1px dotted transparent;
@@ -359,7 +376,8 @@
         }
         .ruby-segment:focus-visible { outline: 2px solid var(--rp-iris); outline-offset: 3px; border-radius: 3px; }
         @media (hover: none) {
-            .furigana-hover ruby rt { visibility: visible; opacity: 1; }
+            #sub-list[data-furigana-mode="hover"] ruby rt,
+            #focus-text[data-furigana-mode="hover"] ruby rt { visibility: visible !important; opacity: 1 !important; }
         }
         .gen-progress-container {
             display: flex;
@@ -973,7 +991,7 @@
             });
             Input.init();
             if ('serviceWorker' in navigator) {
-                navigator.serviceWorker.register('service-worker.js?v=3').catch(err => console.warn('SW registration failed:', err));
+                navigator.serviceWorker.register('service-worker.js?v=4').catch(err => console.warn('SW registration failed:', err));
             }
         },
         async pickFile() {
@@ -1769,8 +1787,11 @@
             const subList = document.getElementById('sub-list');
             const focusText = document.getElementById('focus-text');
             const hoverOnly = this.displayMode === 'hover';
-            subList.classList.toggle('furigana-hover', hoverOnly);
-            focusText.classList.toggle('furigana-hover', hoverOnly);
+            const normalizedMode = hoverOnly ? 'hover' : 'always';
+            [subList, focusText].forEach((target) => {
+                target.classList.remove('furigana-hover', 'hide-furigana');
+                target.dataset.furiganaMode = normalizedMode;
+            });
             document.getElementById('btn-furigana-always').setAttribute('aria-pressed', String(!hoverOnly));
             document.getElementById('btn-furigana-hover').setAttribute('aria-pressed', String(hoverOnly));
         },
