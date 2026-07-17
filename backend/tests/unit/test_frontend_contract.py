@@ -32,8 +32,41 @@ def test_media_picker_and_player_cover_requested_formats() -> None:
         assert f"'{extension}'" in html
         assert f".{extension}" in html
     assert '<video id="media-el"' in html
-    assert "codec bên trong" in html
+    assert "internal codecs must also be browser-compatible" in html
     assert "this.elSubList.scrollTo" in html
+
+
+def test_ruby_readings_render_above_base_text() -> None:
+    html = (FRONTEND_DIR / "index.html").read_text(encoding="utf-8")
+
+    assert "ruby-position: over" in html
+    assert "display: ruby;" in html
+    assert "display: ruby-text;" in html
+    assert 'id="ruby-size-value"' in html
+
+
+def test_user_interface_is_english_only() -> None:
+    html = (FRONTEND_DIR / "index.html").read_text(encoding="utf-8")
+
+    for vietnamese_text in (
+        "Tạo Furigana",
+        "Chưa nạp phụ đề",
+        "Sinh Furigana",
+        "Không có dữ liệu",
+        "Vui lòng nhập",
+        "Trình duyệt không",
+        "Chỉ hỗ trợ file",
+    ):
+        assert vietnamese_text not in html
+
+    for english_text in (
+        "Generate furigana",
+        "Backend offline",
+        "Reading size",
+        "Remove reading",
+        "Keyboard shortcuts",
+    ):
+        assert english_text in html
 
 
 def test_pwa_brand_and_cache_are_updated() -> None:
