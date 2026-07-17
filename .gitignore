@@ -1,0 +1,61 @@
+# Secrets and local configuration
+.env
+.env.*
+!.env.example
+backend/.env
+backend/.env.*
+!backend/.env.example
+secrets/
+
+# Python
+.venv/
+venv/
+__pycache__/
+*.py[cod]
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+.coverage
+coverage.xml
+htmlcov/
+
+# Model, dataset, and generated inference artifacts
+model/
+models/
+model_store/
+artifacts/
+hf_cache/
+.cache/
+*.safetensors
+*.pt
+*.pth
+*.bin
+*.onnx
+inference_artifacts.npz
+artifact_manifest.json
+artifact_recovery_manifest.json
+surface_mode_readings.json
+surfaces.json
+checksums.sha256
+equivalence_*.jsonl
+equivalence_*_manifest.json
+split_assignments.csv
+test_predictions.csv
+report_artifacts*.zip
+
+# Generated reports and logs
+*.log
+benchmark-results/
+dist/
+build/
+*.egg-info/
+
+# Frontend tooling reserved for Phase 2
+node_modules/
+
+# Editors and operating systems
+.idea/
+.vscode/
+.DS_Store
+Thumbs.db
+desktop.ini
